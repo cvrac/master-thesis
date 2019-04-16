@@ -257,6 +257,7 @@ headsep=0.5cm,footskip=0.75cm,
   }
 }
 
+
 \providecommand{\supervisorEn}[2]{%
   \ifthenelse{\isundefined{\@thesupervisorslistEn}}{%
     \def\@thesupervisorslistEn{\textbf{#1,} #2}
@@ -265,6 +266,26 @@ headsep=0.5cm,footskip=0.75cm,
     \def\@supervisorLabelSuffixEn{s}
   }
 }
+
+%
+% Commands for the 1st member of the advisory board
+%
+\newcommand{\boardOneGr}{\advisorGr}
+\newcommand{\boardOneRankGr}{\advisorRankGr}
+\newcommand{\boardOneOrgGr}{\advisorOrgGr}
+\newcommand{\boardOneEn}{\advisorEn}
+\newcommand{\boardOneRankEn}{\advisorRankEn}
+\newcommand{\boardOneOrgEn}{\advisorOrgEn}
+
+%
+% Commands for the 2nd member of the examination board
+%
+\providecommand{\boardTwoGr}[1]{\gdef\@boardTwoGr{#1}}
+\providecommand{\boardTwoRankGr}[1]{\gdef\@boardTwoRankGr{#1}}
+\providecommand{\boardTwoOrgGr}[1]{\gdef\@boardTwoOrgGr{#1}}
+\providecommand{\boardTwoEn}[1]{\gdef\@boardTwoEn{#1}}
+\providecommand{\boardTwoRankEn}[1]{\gdef\@boardTwoRankEn{#1}}
+\providecommand{\boardTwoOrgEn}[1]{\gdef\@boardTwoOrgEn{#1}}
 
 %
 % Commands for setting up abstract (greek and english versions), ack (english
@@ -685,7 +706,7 @@ publications}\gdef\@lopfileinternal{#1}}
     % (thanks to http://tex.stackexchange.com/a/19741)
     % \patchcmd{\chapter}{plain}{empty}{}{}
 
-    \import{./}{abbreviations.tex}
+    \import{./}{misc/abbreviations.tex}
 
     % appendix
     \begin{appendix}
