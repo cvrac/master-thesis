@@ -1,0 +1,131 @@
+\documentclass[inscr,ack,dvipsnames]{dithesis}
+
+%\usepackage{graphicx}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%% User-specific package inclusions %%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{booktabs}
+\usepackage{lipsum}
+\usepackage{enumerate}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{import}
+\PassOptionsToPackage{hyphens}{url}\usepackage[hidelinks]{hyperref}
+\usepackage{tcolorbox}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{setspace}
+% \usepackage[ruled,vlined,linesnumbered,noresetcount]{algorithm2e}
+\usepackage{pgfplots}
+\usepackage{textcomp}
+\usepackage{tabularx}
+\usepackage{listings}
+\usepackage[font=footnotesize, labelfont=bf, textfont=bf, justification=centering]{caption}
+\usepackage[bottom]{footmisc}
+\usepackage{hyperref}
+\usepackage{hyphenat}
+\usepackage{chngcntr}
+\usepackage[titles]{tocloft}  % needed for making chapter titles upper case
+\usepackage{subfig}
+\usepackage[cache=false, newfloat]{minted}
+\usepackage{cite}
+\usepackage{epigraph}
+\usepackage{pdfpages}
+\usepackage{dirtree}
+
+\usepackage{epigraph,varwidth}
+
+% Reduce space between bib items
+\let\OLDthebibliography\thebibliography
+\renewcommand\thebibliography[1]{
+  \OLDthebibliography{#1}
+  \setlength{\parskip}{0pt}
+  \setlength{\itemsep}{0pt plus 0.3ex}
+}
+
+\renewcommand{\epigraphsize}{\small}
+\setlength{\epigraphwidth}{0.6\textwidth}
+\renewcommand{\textflush}{flushright}
+\renewcommand{\sourceflush}{flushright}
+% A useful addition
+\newcommand{\epitextfont}{\itshape}
+\newcommand{\episourcefont}{\scshape}
+
+\makeatletter
+\newsavebox{\epi@textbox}
+\newsavebox{\epi@sourcebox}
+\newlength\epi@finalwidth
+\renewcommand{\epigraph}[2]{%
+  \vspace{\beforeepigraphskip}
+  {\epigraphsize\begin{\epigraphflush}
+   \epi@finalwidth=\z@
+   \sbox\epi@textbox{%
+     \varwidth{\epigraphwidth}
+     \begin{\textflush}\epitextfont#1\end{\textflush}
+     \endvarwidth
+   }%
+   \epi@finalwidth=\wd\epi@textbox
+   \sbox\epi@sourcebox{%
+     \varwidth{\epigraphwidth}
+     \begin{\sourceflush}\episourcefont#2\end{\sourceflush}%
+     \endvarwidth
+   }%
+   \ifdim\wd\epi@sourcebox>\epi@finalwidth
+     \epi@finalwidth=\wd\epi@sourcebox
+   \fi
+   \leavevmode\vbox{
+     \hb@xt@\epi@finalwidth{\hfil\box\epi@textbox}
+     \vskip1.75ex
+     \hrule height \epigraphrule
+     \vskip.75ex
+     \hb@xt@\epi@finalwidth{\hfil\box\epi@sourcebox}
+   }%
+   \end{\epigraphflush}
+   \vspace{\afterepigraphskip}}}
+\makeatother
+
+\makeatletter
+\AtBeginEnvironment{minted}{\dontdofcolorbox}
+\def\dontdofcolorbox{\renewcommand\fcolorbox[4][]{##4}} % Hack to disable red boxes around syntax errors in JSON code snippets
+\makeatother
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%% User-specific package inclusions %%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\import{./}{configuration.tex}
+
+\import{./}{authors.tex}
+
+
+\begin{document}
+
+% counting
+\counterwithout{figure}{chapter}
+\counterwithout{table}{chapter}
+\counterwithout{lstlisting}{chapter}
+
+\frontmatter
+
+\mainmatter
+
+% add main chapters/should have capital letters
+\import{./}{introduction.tex}
+%\import{./}{background.tex}
+%\import{./}{preliminaries.tex}
+%\import{./}{relatedwork.tex}
+%\import{./}{pp-algorithms.tex}
+%\import{./}{implementation.tex}
+%\import{./}{datasets.tex}
+%\import{./}{evaluations.tex}
+%\import{./}{conclusions.tex}
+%
+
+\backmatter
+
+\end{document}
