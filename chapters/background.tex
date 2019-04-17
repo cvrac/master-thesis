@@ -1,10 +1,28 @@
 %TODO: Add background content
 
 \chapter{Background}\label{c:background}
-Lorem\cite{chaurasia2017data}
+
+Several Program Analysis techniques have been proposed in the literature, in
+order to aid developers and users discover interesting program properties within
+their software. For example, one might be interested in finding out whether
+there are memory leaks or whether some piece of code is reachable.
+
+Such techniques come in different flavors, either static or dynamic, and are
+usually based on strong mathematical concepts. In this section we provide with
+a brief background on these concepts and the frameworks utilized towards 
+the development of Program Analysis tools.
 
 \section{Static Program Analysis}
-Ipsum
+
+Static Program Analysis is a Program Analysis technique that aims to reason
+about a program's behaviors without actually running it. It has been
+heavily utilized by optimizing compilers since their early stages and it
+has also found several other applications, among the areas of softare security
+and software debugging and/or correctness\cite{spa}. The question of whether 
+a program is correct or may terminate for all possible inputs is in general
+undecidable.
+
+Static Analyses are based on the Dataflow Framework...
 
 \section{Symbolic Execution}
 Foo
