@@ -15,14 +15,20 @@ the development of Program Analysis tools.
 \section{Static Program Analysis}
 
 Static Program Analysis is a Program Analysis technique that aims to reason
-about a program's behaviors without actually running it. It has been
+about a program's behaviors without actually executing it. It has been
 heavily utilized by optimizing compilers since their early stages and it
 has also found several other applications, among the areas of softare security
 and software debugging and/or correctness\cite{spa}. The question of whether 
 a program is correct or may terminate for all possible inputs is in general
-undecidable.
+undecidable. However, Static Analysis techniques are able to tackle
+undecidability by overapproximating or underapproximating the initial problem,
+attempting to reason over a simplified version of the program.
 
-Static Analyses are based on the Dataflow Framework...
+%TODO: Stuff about soundness/completeness of static program analyses
+
+%TODO: Mention several static program analyses with an emphasis on points-to
+%analyses. Also refer to flow-(in)sensitive, path-(in)sensitive and 
+%context-sensitivity.
 
 \section{Symbolic Execution}
 Foo
