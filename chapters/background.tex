@@ -2,33 +2,50 @@
 
 \chapter{Background}\label{c:background}
 
-Several Program Analysis techniques have been proposed in the literature, in
+Several program analysis techniques have been proposed in the literature, in
 order to aid developers and users discover interesting program properties within
 their software. For example, one might be interested in finding out whether
 there are memory leaks or whether some piece of code is reachable.
 
 Such techniques come in different flavors, either static or dynamic, and are
-usually based on strong mathematical concepts. In this section we provide with
+usually based on strong mathematical concepts. In this section we provide 
 a brief background on these concepts and the frameworks utilized towards 
-the development of Program Analysis tools.
+the development of program analysis tools.
 
 \section{Static Program Analysis}
 
-Static Program Analysis is a Program Analysis technique that aims to reason
+Static program analysis is a program analysis technique that aims to reason
 about a program's behaviors without actually executing it. It has been
 heavily utilized by optimizing compilers since their early stages and it
-has also found several other applications, among the areas of softare security
-and software debugging and/or correctness\cite{spa}. The question of whether 
+has also found several other applications, among the areas of softare security,
+software correctness\cite{spa}. The question of whether 
 a program is correct or may terminate for all possible inputs is in general
-undecidable. However, Static Analysis techniques are able to tackle
+undecidable. However, static analysis techniques are able to tackle
 undecidability by overapproximating or underapproximating the initial problem,
-attempting to reason over a simplified version of the program.
+attempting to reason over a simplified version of it.
+
+%
+% examples of analyses 
+%
+
+There is a plethora of different static analysis algorithms in the literature, each one
+met in several domains. For example, one may utilize analyses such as \emph{liveness} and/or 
+\emph{pointer} analyses in an optimizing compiler with the intention of eliminating
+dead code regions or performing a constant propagation/folding optimization.
+A \emph{reachability} analysis that determines whether a specific program point is 
+reachable could be used for example by a software correctness tool to make sure that
+an erroneous state is actually never reached.
+
+There is a variety of design choices that may prove essential towards the \emph{scalability}
+and \emph{precision} of a static program analysis algorithm.
+
+\subsection{Whole-Program vs. Partial Analyses}
+
+\subsection{Flow-Sensitivity}
+
+\subsection{Path-Sensitivity}
 
 %TODO: Stuff about soundness/completeness of static program analyses
-
-%TODO: Mention several static program analyses with an emphasis on points-to
-%analyses. Also refer to flow-(in)sensitive, path-(in)sensitive and 
-%context-sensitivity.
 
 \section{Symbolic Execution}
 Foo
