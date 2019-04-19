@@ -64,7 +64,13 @@ way that the analysis practitioner would tune its performance - scalability and
 precision. In the whole-program analysis setting the design tradeoffs between
 scalability and precision might prove crucial towards the overall analysis
 reasoning, though a modular-analysis may be able to perform more precise reasoning,
-due to the relatively restricted area of interest. 
+due to the relatively restricted area of interest. Whole-program analyses are
+commonly used in the analysis of languages with complex language features. Those
+languages, such as the object-oriented ones need to reason about language constructs
+that may reside on the heap, and thus they may benefit from a whole-program analysis
+reasoning. Such an analysis may do not take into consideration the
+exact ordering of the instructions of a program, sacrificing precision towards
+better scalability.
 
 \subsection{Flow-Sensitivity}
 
