@@ -40,29 +40,30 @@ There is a variety of design choices that may prove essential towards the \emph{
 and \emph{precision} of a static program analysis algorithm. We briefly describe some of
 those choices in the context of this work.
 
-\subsection{Whole-Program vs. Partial Analyses}
+\subsection{Whole-Program vs. Modular Analyses}
 
 Whole-Program analyses need not be confused with \emph{inter-procedural} analyses. 
 An inter-procedural analysis considers multiple functions in order to perform
 its computations. However, a \emph{whole}-program analysis does not only reason
 about a program's properties across different functions, but also includes any 
 external dependencies during its computations, such as external libraries or 
-native calls. Thus, one would argue that an inter-procedural style analysis is 
-essentially a subset of whole-program analysis.
+native calls.
 
-On the contrary, a \emph{partial}-analysis reasons about specific parts of a
+On the contrary, a \emph{modular}-analysis reasons about specific parts of a
 program, disregarding dependencies across different calls and external code.
-Partial-analysis is fundamentally proportional to \emph{intra}-procedural analyses.
+Modular-analysis is fundamentally proportional to \emph{intra}-procedural analyses.
 In the intra-procedural setting, an analysis would restrict its reasoning within
 a specific function bound, overlooking the way that function calls or external
-dependencies affect the computations inside the function.
+dependencies affect the computations inside the function. However, someone could
+also perform a modular-style analysis across a relatively small set of functions,
+that is an \emph{inter-procedural} analysis.
 
 Whether the analysis would reason about a program's properties in a whole-program
-or a partial manner is of great importance, because such a decision affects the
+or a modular manner is of great importance, because such a decision affects the
 way that the analysis practitioner would tune its performance - scalability and
 precision. In the whole-program analysis setting the design tradeoffs between
 scalability and precision might prove crucial towards the overall analysis
-reasoning, though a partial-analysis may be able to perform more precise reasoning,
+reasoning, though a modular-analysis may be able to perform more precise reasoning,
 due to the relatively restricted area of interest. 
 
 \subsection{Flow-Sensitivity}
