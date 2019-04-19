@@ -68,11 +68,32 @@ due to the relatively restricted area of interest. Whole-program analyses are
 commonly used in the analysis of languages with complex language features. Those
 languages, such as the object-oriented ones need to reason about language constructs
 that may reside on the heap, and thus they may benefit from a whole-program analysis
-reasoning. Such an analysis may do not take into consideration the
+reasoning. Such an analysis may not take into consideration the
 exact ordering of the instructions of a program, sacrificing precision towards
-better scalability.
+better scalability. 
 
 \subsection{Flow-Sensitivity}
+
+The concept of whether an analysis is designed with respect to 
+the instruction ordering is called \emph{flow-sensitivity}.
+On the contrary, an analysis that is not designed that way is 
+called flow-insensitive. Flow-sensitivity is tightly related with
+the scalability and precision of static program analyses. 
+Whole-program analyses may usually omit the control-flow constructs
+during any of their reasoning. However, many whole-program static
+analyses like the \doop{} framework's Pointer analysis for Java
+manage to add flow-sensitivity to their core analysis by slight
+preprocessing\cite{points-to15}.
+
+Several tools utilize state-of-the-art compiler technologies to 
+convert the input source to a lower level \emph{intermediate-representation (IR)}.
+For instance, there is a plethora of tools that utilize the \emph{LLVM Compiler 
+Infrastructure}\cite{llvm-lattner} for \emph{C}-like languages,
+or \emph{Soot - A Java optimization framework}\cite{soot} - for JVM languages. 
+These tools may further lower the source code in a 
+\emph{Static Single Assignment (SSA)} form. In SSA form, each variable is 
+assigned exactly once, never to be re-assigned again and it is also defined 
+before any of its uses. 
 
 \subsection{Path-Sensitivity}
 
