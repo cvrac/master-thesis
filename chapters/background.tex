@@ -70,40 +70,71 @@ languages, such as the object-oriented ones need to reason about language constr
 that may reside on the heap, and thus they may benefit from a whole-program analysis
 reasoning. Such an analysis may not take into consideration the
 exact ordering of the instructions of a program, sacrificing precision towards
-better scalability. 
+better scalability.
 
 \subsection{Flow-Sensitivity}
 
-The concept of whether an analysis is designed with respect to 
+The concept of whether an analysis is designed with respect to
 the instruction ordering is called \emph{flow-sensitivity}.
-On the contrary, an analysis that is not designed that way is 
+On the contrary, an analysis that is not designed that way is
 called flow-insensitive. Flow-sensitivity is tightly related with
-the scalability and precision of static program analyses. 
+the scalability and precision of static program analyses, due to the
+fact that a flow-sensitive analysis keeps track of program properties
+at every point of it, eg. before or after every instruction.
 Whole-program analyses may usually omit the control-flow constructs
 during any of their reasoning. However, many whole-program static
 analyses like the \doop{} framework's Pointer analysis for Java
 manage to add flow-sensitivity to their core analysis by slight
 preprocessing\cite{points-to15}.
 
-Several tools utilize state-of-the-art compiler technologies to 
+Several tools utilize state-of-the-art compiler technologies to
 convert the input source to a lower level \emph{intermediate-representation (IR)}.
 For instance, there is a plethora of tools that utilize the \emph{LLVM Compiler 
 Infrastructure}\cite{llvm-lattner} for \emph{C}-like languages,
-or \emph{Soot - A Java optimization framework}\cite{soot} - for JVM languages. 
-These tools may further lower the source code in a 
-\emph{Static Single Assignment (SSA)} form. In SSA form, each variable is 
-assigned exactly once, never to be re-assigned again and it is also defined 
-before any of its uses. 
+or \emph{Soot - A Java optimization framework}\cite{soot} - for JVM languages.
+These tools may further lower the source code in a
+\emph{Static Single Assignment (SSA)} form. In SSA form, each variable is
+assigned exactly once, never to be re-assigned again and it is also defined
+before any of its uses, thus yielding a flow-sensitive representation.
 
 \subsection{Path-Sensitivity}
 
-%TODO: Stuff about soundness/completeness of static program analyses
+A path-sensitive analysis is in a way an enhanced version of a
+flow-sensitive analysis which also considers the path taken up to
+a specific program point. Such an analysis
+introduces a path representation usually encoded as the combination of
+a program's neighboring branch conditional expressions,
+named \textit{path predicate}. A path predicate is essentially a
+function of boolean variables whose assignment yields a
+different program path.
+
+Explicit knowledge of the path taken up to a specific
+program point allows the analysis to achieve higher
+precision, ideally eliminating the need for any approximation.
+However, such knowledge comes at a cost; the number of a program's
+paths is exponential to the number of branches within the program,
+thus an analysis that keeps track of all possible paths would not
+manage to scale. There have been suggested multiple techniques
+\cite{dillig2008sound}, \cite{das2002esp} to address such issues
+in the literature. Some of those techniques manage to achieve
+scalability by restricting the context of the computations or
+by introducing loose abstractions of the initial problem.
+
+As a static analysis technique a path-sensitive analysis does not
+eventually execute the program, rather utilizes
+the path encoding in order to assert properties that hold at
+specific program points. On the contrary, there have been
+proposed several techniques of (semi-) dynamic nature
+that either execute directly the program or provide
+an in-depth analysis of a running program by code
+instrumentation.
 
 \section{Symbolic Execution}
-Foo
+
+Symbolic execution
 
 \section{Theorem Provers}
-Lalal
+
+Theorem Provers
 
 \section{Datalog}
-Datalog stuff
