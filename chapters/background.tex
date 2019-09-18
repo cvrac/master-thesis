@@ -119,22 +119,49 @@ manage to scale. There have been suggested multiple techniques
 in the literature. Some of those techniques manage to achieve
 scalability by restricting the context of the computations or
 by introducing loose abstractions of the initial problem.
-
 As a static analysis technique a path-sensitive analysis does not
 eventually execute the program, rather utilizes
 the path encoding in order to assert properties that hold at
-specific program points. On the contrary, there have been
-proposed several techniques of (semi-) dynamic nature
-that either execute directly the program or provide
-an in-depth analysis of a running program by code
-instrumentation.
+specific program points.
+
+One of the adverse effects of pure Static Analysis techniques
+is that they result a large amount of \textit{false positives} by
+trading off precision for scalability. In the context of
+such techniques, a false positive is said to be an erroneous report
+of a static analysis tool that a property violation has been
+discovered within the analyzed program, though such violation
+does not eventually exist. There have been
+proposed several techniques of either (semi-) dynamic nature
+that execute directly the program via code instrumentation, or
+static solutions that attempt to simulate the execution of a program.
 
 \section{Symbolic Execution}
 
-Symbolic execution
+Symbolic Execution is yet another program analysis technique that
+may be of either static or dynamic flavors and mainly attempts
+to answer whether certain properties of a program could potentially
+be violated by a piece of code\cite{baldoni2018survey}.
+
+In contrast to the aforementioned static analysis methods that
+do not directly execute a program Symbolic (or \textit{Concolic}) Execution,
+attempts to simulate the execution of a
+program by considering symbolic (non-deterministic) values for its input.
+During the concrete execution of a program a single execution path is
+cosidered for any computation, whilst a Symbolic Execution engine manages
+to explore a plethora of paths thanks to the symbolic values assigned to
+its input variables. \textit{Concolic Execution} is a mixture of symbolic and concrete
+execution that considers concrete input values when possible, thus making
+symbolic execution feasible in practice. The latter is usually described
+as Dynamic Symbolic Execution (DSE).
+
+
+// TODO: Core symbolic execution and integration with theorem provers or constraint solvers
 
 \section{Theorem Provers}
 
-Theorem Provers
+// TODO: Stuff about theorem proving and especially SAT/SMT solvers
 
 \section{Datalog}
+
+// TODO: Datalog example, popular Datalog use cases and applications in Static Analysis
+
