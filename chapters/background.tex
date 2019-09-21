@@ -8,8 +8,8 @@ their software. For example, one might be interested in finding out whether
 there are memory leaks or whether some piece of code is reachable.
 
 Such techniques come in different flavors, either static or dynamic, and are
-usually based on strong mathematical concepts. In this section we provide 
-a brief background on these concepts and the frameworks utilized towards 
+usually based on strong mathematical concepts. In this section we provide
+a brief background on these concepts and the frameworks utilized towards
 the development of program analysis tools.
 
 \section{Static Program Analysis}
@@ -18,21 +18,21 @@ Static program analysis is a program analysis technique that aims to reason
 about a program's behaviors without actually executing it. It has been
 heavily utilized by optimizing compilers since their early stages and it
 has also found several other applications, among the areas of softare security,
-software correctness\cite{spa}. The question of whether 
+software correctness\cite{spa}. The question of whether
 a program is correct or may terminate for all possible inputs is in general
 undecidable. However, static analysis techniques are able to tackle
 undecidability by overapproximating or underapproximating the initial problem,
 attempting to reason over a simplified version of it.
 
 %
-% examples of analyses 
+% examples of analyses
 %
 
 There is a plethora of different static analysis algorithms in the literature, each one
-met in several domains. For instance, one may utilize analyses such as \emph{liveness} and/or 
+met in several domains. For instance, one may utilize analyses such as \emph{liveness} and/or
 \emph{pointer} analyses in an optimizing compiler with the intention of eliminating
 dead code regions or performing a constant propagation/folding optimization.
-Similarly, a \emph{reachability} analysis that determines whether a specific program point is 
+Similarly, a \emph{reachability} analysis that determines whether a specific program point is
 reachable could be used by a software correctness tool to make sure that
 an erroneous state is actually never reached.
 
@@ -42,11 +42,11 @@ those choices in the context of this work.
 
 \subsection{Whole-Program vs. Modular Analyses}
 
-Whole-Program analyses need not be confused with \emph{inter-procedural} analyses. 
+Whole-Program analyses need not be confused with \emph{inter-procedural} analyses.
 An inter-procedural analysis considers multiple functions in order to perform
 its computations. However, a \emph{whole}-program analysis does not only reason
-about a program's properties across different functions, but also includes any 
-external dependencies during its computations, such as external libraries or 
+about a program's properties across different functions, but also includes any
+external dependencies during its computations, such as external libraries or
 native calls.
 
 On the contrary, a \emph{modular}-analysis reasons about specific parts of a
