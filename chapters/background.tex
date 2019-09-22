@@ -105,8 +105,8 @@ a specific program point. Such an analysis
 introduces a path representation usually encoded as the combination of
 a program's neighboring branch conditional expressions,
 named \textit{path predicate}. A path predicate is essentially a
-function of boolean variables whose assignment yields a
-different program path.
+\textit{Boolean formula}, that is a function of boolean variables whose assignment yields a
+different control-flow path.
 
 Explicit knowledge of the path taken up to a specific
 program point allows the analysis to achieve higher
@@ -138,28 +138,82 @@ static solutions that attempt to simulate the execution of a program.
 \section{Symbolic Execution}
 
 Symbolic Execution is yet another program analysis technique that
-may be of either static or dynamic flavors and mainly attempts
+may be of either static or dynamic flavor and mainly attempts
 to answer whether certain properties of a program could potentially
-be violated by a piece of code\cite{baldoni2018survey}.
+be violated by a piece of code\cite{baldoni2018survey}. At the same
+time it also results an automated way to generate test cases for
+programs under testing.
 
-In contrast to the aforementioned static analysis methods that
-do not directly execute a program Symbolic (or \textit{Concolic}) Execution,
-attempts to simulate the execution of a
+In contrast to the aforementioned static analysis techniques that
+do not directly execute a program, Symbolic (or \textit{Concolic}) Execution
+mainly attempts to simulate the execution of a
 program by considering symbolic (non-deterministic) values for its input.
-During the concrete execution of a program a single execution path is
+Usually, during the concrete execution of a program a single execution path is
 cosidered for any computation, whilst a Symbolic Execution engine manages
 to explore a plethora of paths thanks to the symbolic values assigned to
-its input variables. \textit{Concolic Execution} is a mixture of symbolic and concrete
+its input variables. As such, a concrete execution is said to under-approximate
+the desired analysis. \textit{Concolic Execution} is a mixture of symbolic and concrete
 execution that considers concrete input values when possible, thus making
 symbolic execution feasible in practice. The latter is usually described
-as Dynamic Symbolic Execution (DSE).
+as Dynamic Symbolic Execution (DSE). Several tools have been proposed
+in the literature such as SAGE\cite{godefroid2012sage} and KLEE\cite{cadar2008klee},
+that are considered to be the tools of choice when it comes to
+binary analysis and/or systems testing.
 
-
-// TODO: Core symbolic execution and integration with theorem provers or constraint solvers
+In the symbolic setting, execution is typically driven by a
+\textit{symbolic execution engine} which at its core maintains some state
+for every explored path. The core data-structures of such
+an engine are the \textit{Boolean formulas} that encode an execution path by
+considering the satisfied conditions taken for that exact path, and a
+\textit{symbolic store} that keeps a mapping between the variables met within the path
+and their equivalent symbolic expressions or values. The former are constructed
+on each branch execution, while the latter is updated after an assignment to
+the corresponding variable. Established by those two structures for a path,
+the engine utilizes an \textit{automated theorem prover} whose purpose is to
+check whether there is any violation of the property under analysis that
+would lead to a failed execution, besides verifying path feasibility. A path
+is said to be feasible in such scenario, if there exists an assignment of
+concrete values to its symbolic encoding that would yield the satisfiability
+of its boolean formula. Along with \textit{path-explosion} due to the exponential state
+space exploration, non-deterministic inputs and several other vulnerabilities,
+symbolic execution efficiency also relies to the use of efficient external
+theorem provers. Ongoing research attempts to face those threats in order
+to provide better tools that aid developers and help discover bugs in
+programs.
 
 \section{Theorem Provers}
 
-// TODO: Stuff about theorem proving and especially SAT/SMT solvers
+\textit{Automated theorem proving}, namely the ability to automatically prove a
+mathematical theorem has been the insatiable desire of the scientific
+community for an extensive period of time. Theorem proving's establishment
+is essentially mathematical logic formulas and modelling. On the other hand,
+\textit{Computer Science} foundations lie within mathematics and logic.
+Many times software developers want to prove that a specific property is satisfied
+for a program and its given input values, like its termination. Computer
+programs can also be encoded as a logical formula and so formal theorems may be
+constructed in the programming setting too.
+
+The purpose of an automated theorem prover (ATP) is ideally to answer whether a
+theorem can be proven or not, providing at the same time a formal proof
+or a counterexample. Automated theorem proving was initially considered to be
+part of Artificial Intelligence (AI). However, human assistance would be essential
+in many cases, leading at he same time to the recognition of unable to be proven
+theorems (such as termination).
+
+Automated theorem proving has lead to the creation of several tools following
+different approaches to solve the same problem: proof construction. Of particular
+interest have been satisfiability modulo theories (SMT) provers (or solvers)
+that are the main tools employed in symbolic execution. SMT is a generalization
+of the traditional boolean satisfiability problem (SAT) that utilizes underlying
+decidable mathematical theories in order to encode and give semantical
+meaning to function predicates instead of boolean (binary) variables. Such theories
+are the theory of linear arithmetic, bitvectors and arrays and provide a powerful
+expressiveness to the related solvers which could also be considered as
+constraint satisfaction engines. Provided a predicate formula encoding, a prover
+aims to check whether the formula is satisfiable; there is an assignment of values
+to the compounded predicates. The state of the art tools for theorem proving 
+have been the Z3 Theorem Prover\cite{de2008z3}, and the Coq Proof
+Assistant\cite{Coq}, an interactive theorem prover
 
 \section{Datalog}
 
