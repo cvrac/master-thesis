@@ -1,5 +1,23 @@
 %TODO: Add background content
 
+%\newcommand{\args}[1]{\textit{\small{#1}}}
+\newcommand{\args}[1]{\textcolor{Bittersweet}{\small{#1}}}
+
+\newcommand{\relname}[1]{\textcolor{NavyBlue}{\textsc{\small{#1}}}}
+\newcommand{\rel}[2]{\texttt{\relname{#1}(\args{#2})}}
+
+\newcommand{\altrelname}[1]{\textsc{\underline{#1}}}
+\newcommand{\altrel}[2]{\altrelname{#1} (\args{#2})}
+
+\newcommand{\consname}[1]{\textsc{\textbf{\relname{#1}}}}
+\newcommand{\consapp}[2]{\consname{#1} (\args{#2})}
+\newcommand{\cons}[3]{\consapp{#1}{#2} = \textbf{\args{#3}}}
+
+\newcommand{\dl}[1]{{\texttt{#1}}}
+% \newcommand{\rulearrow}{\large{\textbf{$\leftarrow$}}}
+\newcommand{\rulearrow}{\large{:-}}
+\newcommand{\ruleforall}{{\large{\textbf{$\implies$}}}}
+
 \chapter{Background}\label{c:background}
 
 Several program analysis techniques have been proposed in the literature, in
@@ -9,7 +27,7 @@ there are memory leaks or whether some piece of code is reachable.
 
 Such techniques come in different flavors, either static or dynamic, and are
 usually based on strong mathematical concepts. In this section we provide
-a brief background on these concepts and the frameworks utilized towards
+a brief background on these concepts and frameworks utilized towards
 the development of program analysis tools.
 
 \section{Static Program Analysis}
@@ -17,11 +35,11 @@ the development of program analysis tools.
 Static program analysis is a program analysis technique that aims to reason
 about a program's behaviors without actually executing it. It has been
 heavily utilized by optimizing compilers since their early stages and it
-has also found several other applications, among the areas of softare security,
+has also found several other applications, among the areas of software security,
 software correctness\cite{spa}. The question of whether
 a program is correct or may terminate for all possible inputs is in general
 undecidable. However, static analysis techniques are able to tackle
-undecidability by overapproximating or underapproximating the initial problem,
+undecidability by over-approximating or under-approximating the initial problem,
 attempting to reason over a simplified version of it.
 
 %
@@ -80,7 +98,7 @@ On the contrary, an analysis that is not designed that way is
 called flow-insensitive. Flow-sensitivity is tightly related with
 the scalability and precision of static program analyses, due to the
 fact that a flow-sensitive analysis keeps track of program properties
-at every point of it, eg. before or after every instruction.
+at every point of it, e.g. before or after every instruction.
 Whole-program analyses may usually omit the control-flow constructs
 during any of their reasoning. However, many whole-program static
 analyses like the \doop{} framework's Pointer analysis for Java
@@ -125,7 +143,7 @@ the path encoding in order to assert properties that hold at
 specific program points.
 
 One of the adverse effects of pure Static Analysis techniques
-is that they result a large amount of \textit{false positives} by
+is that they result in a large amount of \textit{false positives} by
 trading off precision for scalability. In the context of
 such techniques, a false positive is said to be an erroneous report
 of a static analysis tool that a property violation has been
@@ -141,7 +159,7 @@ Symbolic Execution is yet another program analysis technique that
 may be of either static or dynamic flavor and mainly attempts
 to answer whether certain properties of a program could potentially
 be violated by a piece of code\cite{baldoni2018survey}. At the same
-time it also results an automated way to generate test cases for
+time it also results in an automated way to generate test cases for
 programs under testing.
 
 In contrast to the aforementioned static analysis techniques that
@@ -149,7 +167,7 @@ do not directly execute a program, Symbolic (or \textit{Concolic}) Execution
 mainly attempts to simulate the execution of a
 program by considering symbolic (non-deterministic) values for its input.
 Usually, during the concrete execution of a program a single execution path is
-cosidered for any computation, whilst a Symbolic Execution engine manages
+considered for any computation, whilst a Symbolic Execution engine manages
 to explore a plethora of paths thanks to the symbolic values assigned to
 its input variables. As such, a concrete execution is said to under-approximate
 the desired analysis. \textit{Concolic Execution} is a mixture of symbolic and concrete
@@ -197,7 +215,7 @@ The purpose of an automated theorem prover (ATP) is ideally to answer whether a
 theorem can be proven or not, providing at the same time a formal proof
 or a counterexample. Automated theorem proving was initially considered to be
 part of Artificial Intelligence (AI). However, human assistance would be essential
-in many cases, leading at he same time to the recognition of unable to be proven
+in many cases, leading at the same time to the recognition of unable to be proven
 theorems (such as termination).
 
 Automated theorem proving has lead to the creation of several tools following
@@ -211,11 +229,67 @@ are the theory of linear arithmetic, bitvectors and arrays and provide a powerfu
 expressiveness to the related solvers which could also be considered as
 constraint satisfaction engines. Provided a predicate formula encoding, a prover
 aims to check whether the formula is satisfiable; there is an assignment of values
-to the compounded predicates. The state of the art tools for theorem proving 
+to the compounded predicates. The state of the art tools for theorem proving
 have been the Z3 Theorem Prover\cite{de2008z3}, and the Coq Proof
 Assistant\cite{Coq}, an interactive theorem prover
 
-\section{Datalog}
+\section{Datalog and \doop{}}
 
-// TODO: Datalog example, popular Datalog use cases and applications in Static Analysis
+\subsection{Datalog}
 
+\textit{Datalog} is a declarative programming language, essentially a subset of the  \textit{Prolog}
+programming language due to the lack of function symbols, the cut operator among
+other features. It is also usually considered a query language and has been described
+as pure SQL enhanhanced with recursion.
+
+Clause ordering does not matter in Datalog, and thus any order of computation is
+guaranteed to yield the same results, unlike Prolog. Computation in Datalog is
+established by declaring \textit{input facts} along with \textit{reasoning rules}. Based on those,
+anything that can be inferred is computed by the underlying engine reaching
+a convergence state due to the fact that only new facts, that is asserted truth,
+can be produced by the inference rules. Such rules are called \textit{monotonic} and
+the associated computation is the \emph{fixed-point}: rules produce new facts
+until a convergence state is reached.
+
+The main statements of Datalog are the inference rules, usually consisting of
+the \emph{head} and the \emph{body}, or formally \texttt{rule}. Both the head and the body
+may consist of conjunctions (expressed with the comma operator ,) or
+disjunctions (expressed with the semicolon operator) of predicates, equivalently called
+relations. Sharing many similarities with databases, a relation can be thought
+of as a database table, whilst input facts and inferred knowledge can be thought of as
+the database rows. The comma operator along with the variable constraints that
+may form along the operand relations describes what is essentially known
+as the join operator in the database community.
+
+Datalog has been extensively used both in the academic world and the industry. Several
+prominent knowledge databases have been designed with Datalog being the underlying engine
+(i.e. LogicBlox). Datalog also finds use cases in the construction of network
+specification files, distributed systems, security analysis of
+smart contracts\cite{grech2018madmax}
+and static program analysis. One of the
+static analysis tools that have successfully embodied Datalog to express its analyses
+is the \doop{} framework.
+
+\subsection{The \doop{} framework}
+
+The \doop{} framework is a static program analysis tool particularly performing
+pointer analysis for the languages of the Java Virtual Machine (JVM) ecosystem.
+Late work has also included analysis of Python, and especially TensorFlow programs.
+
+\doop{} analyses are expressed in the Datalog language in a purely declarative
+setting and the framework itself is known to be the first to introduce full,
+end-to-end context-sensitive analyses for JVM based languages. The use of
+Datalog has lead to the generation of new algorithms for pointer analysis
+that manage to scale, yet provide accurate results.
+
+\doop{} at first utilizes the Soot framework to convert the initial
+program, usually compressed as a Java ARchive (JAR) into Java bytecode.
+Based on the bytecode version of the program, \doop{} generates the input
+facts for the analysis, introducing several relations that can be pre-computed.
+The framework then includes the Datalog based Souffle tool for
+static analysis\cite{jordan2016souffle} in order to perform any reasoning starting from
+the provided input facts. That is, Souffle is the tool in which any reasoning happens.
+\doop{} analyses have been expressed by a bunch of Datalog rules in Souffle Datalog.
+Even though several context-sensitive analyses have been expressed, there is not any
+path-sensitive analysis within the framework, thus it relies on the flow-sensitivity
+introduced by Soot.
