@@ -1,25 +1,97 @@
-%TODO: Add content
-
 \chapter{Static Declarative Symbolic Reasoning}\label{c:main-content}
 
-our approach
+In this chapter we present our approach towards static declarative
+symbolic reasoning. The main core of the reasoning is encoded as a
+bunch of Souffle Datalog rules, along with the related input facts.
+\doop{} includes a whole of preprocessing, expressive analyses and
+postprocessing pieces that can be leveraged to enhance the core of
+our reasoning at relatively swift speed.
 
 \section{Schema Relations and Program Expression Trees}
 
-input facts and Reasoning
+\subsection{Schema}
+
+\doop{} includes a set of fact generators that provide us with an
+extensive set of input facts that may be leveraged for our reasoning.
+Those generators either target different input languages or different
+intermediate representations (IR). As an example, there are generators
+that target the Java language, Android technology or Python. Those
+generators may further utilize different tools that would take care
+the translation of the input program into the corresponding IR; the
+current tools being used by \doop{} are namely Soot and WALA. In the case of
+Java, the generators ought to produce the same set of input facts
+that \doop{} consumes for its main analyses, and thus there is a set
+of files that define the common predicates-facts that should be
+produced by the generators. The existing set of generated
+facts is quite extensive and it is constantly further enriched, yet it
+does not provide us with a set of facts crucial for the reasoning
+we introduce. Hosting a rich whole of various pointer analyses,
+\doop{} mainly needs knowledge that is related to pointers, or
+in the Java setting reference types. As such, \doop{} lacks
+presence of multiple facts in regard to primitive types or
+values and in the case that they exist they are relatively
+non-adequate. In that notion we decided to modify the common fact
+generator in a way that enhances \doop{} with facts to be consumed
+by our symbolic reasoning approach, or modifies several existing ones.
+At the same time those facts may also come handy for \doop{} itself
+in the future. In order to be able to construct a fine-grained
+analysis we modified a certain amount of facts as follows in figure \ref{fig:facts-modified}.
+
+\begin{figure}[th]
+\rel{\_AssignOperFrom}{instruction, position, from}.\\
+\rel{\_IfVar}{instruction, position, var}.
+\captionof{figure}{Modified \doop{} facts}
+\label{fig:facts-modified}
+\end{figure}
+
+\_AssignOperFrom introduces a new position variable that keeps track of
+each subsequent operand of an instruction's right-hand side (rhs), whilst
+the same also holds for \_IfVar too. Next, we provide a glimpse of all the
+newly introduced generated facts in figure \ref{fig:facts-new}.
+
+\begin{figure}[th]
+  \rel{\_OperatorAt}{instruction, operator}.\\
+  \rel{\_DummyIfVar}{instruction, var}.\\
+  \rel{\_AssignOperFromConstant}{instruction, position, from}.\\
+  \rel{\_IfConstant}{instruction, position, constant}.
+  \captionof{figure}{New \doop{} facts}
+  \label{fig:facts-new}
+\end{figure}
+
+Those input facts share many similarities in regards to the associated
+variables - relation columns - though each one encodes crucial knowledge.
+The \_OperatorAt relation holds facts that encode the operation being present
+at a given instruction. \_AssignOperFromConstant is an alternate rule of \_AssignOperFrom,
+whilst \_IfConstant is equivalent to \_IfVar. A constant type is different to a variable type
+in the context of the framework, thus the need for a more detailed differentiation between the
+two. Such differentiations have extensively been made during the development of our approach, but
+in many cases will be omitted in the context of this text.
+Lastly, the \_DummyIfVar relation has been introduced in order to encode the conditional
+expressions at a given branch instruction, that is quite necessary to our implementation
+and its need is evoked due to the IR provide by Soot. It is also worth mentioning that
+the facts and the associated relations as described above are provided by the generators
+written in Java. Mere preprocessing takes place before importing the final facts into \doop{}'s
+knowledge base in order to follow its conventions. That preprocessing leads to the following
+renames as described in figure \ref{fig:imported-facts}.
+
+\begin{figure}[th]
+  \rel{AssignOper\_From}{instruction, position, from}.\\
+  \rel{AssignOper\_FromConstant}{instruction, position, from}.\\
+  \rel{If\_Var}{instruction, position, var}.\\
+  \rel{If\_Constant}{instruction, position, constant}.\\
+  \rel{DummyIf\_Var}{instruction, var}.\\
+  \rel{Operator\_At}{instruction, operator}.\\
+  \captionof{figure}{Imported facts}
+  \label{fig:imported-facts}
+\end{figure}
 
 \section{Path Expressions}
 
-pathhz
 
 \section{Boolean Symbolic Reasoning}
 
-reasoning logic
 
 \subsection{Propositional Logic Axioms}
 
-pure axioms
 
 \subsection{Propositional Logic Inference Rules}
-
-inferencer
