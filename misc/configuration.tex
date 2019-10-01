@@ -133,3 +133,16 @@
 % \newcommand{\rulearrow}{\large{\textbf{$\leftarrow$}}}
 \newcommand{\rulearrow}{\large{:-}}
 \newcommand{\ruleforall}{{\large{\textbf{$\implies$}}}}
+
+\newcommand{\typename}[1]{\textcolor{Bittersweet}{\small{#1}}}
+\newcommand{\type}[1]{\texttt{\textcolor{NavyBlue}{.type} \typename{#1} \textcolor{NavyBlue}{=} }}
+\newcommand{\singlefield}[1]{\texttt{\textcolor{Bittersweet}{\small{#1}}}}
+
+\makeatletter
+\newcommand{\typefields}[1]{%
+  \texttt{\textcolor{NavyBlue}{[ }\\\textcolor{Bittersweet}{\small{#1}}}\checknextarg}
+\newcommand{\checknextarg}{
+  \@ifnextchar\bgroup{\gobblenextarg}{ \\ \texttt{\textcolor{NavyBlue}{]}}\\ }}
+\newcommand{\gobblenextarg}[1]{
+\texttt{\textcolor{NavyBlue}{,}}\\ \texttt{\textcolor{Bittersweet}{\small{#1}}}
+\@ifnextchar\bgroup{\gobblenextarg}{ \\ \texttt{\textcolor{NavyBlue}{]}}\\ }}
