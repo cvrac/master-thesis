@@ -85,6 +85,41 @@ renames as described in figure \ref{fig:imported-facts}.
   \label{fig:imported-facts}
 \end{figure}
 
+The relations described thus far are only a small set of the input to our reasoning, as we have
+made use of the various relations and rules that were already existed in \doop{}. Here we have
+only presented the brand new input relations or the ones that we modified. However we can
+not provide an extensive presentation of all, thus we will briefly describe them in the
+following sections, in the context of the rules that they are used.
+
+\subsection{Program Expression Trees}
+
+Our symbolic reasoning approach namely reasons about a program's possible expressions. That
+said, there is a need for the representation of a program's expression, either primitive ones
+or not. \doop{} does not include such an encoding, due to the fact that its analyses mainly
+reason about pointers. In order to address that and also lay the foundations of our approach,
+we have introduced the following types as described in figure \ref{fig:expr-type}.
+
+\begin{figure}[th]
+  \type{SymbolicInput}\singlefield{Var | MethodInvocation | NumConstant}\\
+  \type{Operator}\singlefield{symbol}\\
+  \type{ExpressionType}\singlefield{PrimitiveType | ReferenceType}\\
+  \type{Base}\singlefield{SymbolicInput | Operator}\\
+  \type{Expr}\typefields{\tab base: Base}{\tab type: ExpressionType}{\tab left: Expr}{\tab right: Expr}\\
+  \captionof{figure}{Expression Type}
+  \label{fig:expr-type}
+\end{figure}
+
+The types that are defined using a (\dl{|}) symbol are said to inherit from the
+associated types, whilst the latter definition introduces a new record type. The
+expression type manages to represent both unary, binary and constant expressions at the same time,
+by distinguishing each case with the help of the \textit{base} field. If base is of type
+\textit{SymbolicInput} then the latter \textit{Expr} fields are nil, whilst in the case of
+base being of \textit{Operator} at least the first of the Expr fields is indeed an expression.
+For each distinct expression we also preserve its type, which can either be
+\textit{PrimitiveType} or \textit{ReferenceType}. Those types are the building blocks for the
+construction of the program's expression. It may come natural to the reader that
+the encoding leads to complex expression trees.
+
 \section{Path Expressions}
 
 
