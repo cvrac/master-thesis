@@ -7,9 +7,9 @@ bunch of Souffle Datalog rules, along with the related input facts.
 postprocessing pieces that can be leveraged to enhance the core of
 our reasoning at relatively swift speed.
 
-\section{Schema Relations and Program Expression Trees}
+\section{Schema Relations and Types}
 
-\subsection{Schema}
+\subsection{Input Facts and Types}
 
 \doop{} includes a set of fact generators that provide us with an
 extensive set of input facts that may be leveraged for our reasoning.
@@ -91,8 +91,6 @@ only presented the brand new input relations or the ones that we modified. Howev
 not provide an extensive presentation of all, thus we will briefly describe them in the
 following sections, in the context of the rules that they are used.
 
-\subsection{Program Expression Trees}
-
 Our symbolic reasoning approach namely reasons about a program's possible expressions. That
 said, there is a need for the representation of a program's expression, either primitive ones
 or not. \doop{} does not include such an encoding, due to the fact that its analyses mainly
@@ -112,21 +110,65 @@ we have introduced the following types as described in figure \ref{fig:expr-type
 The types that are defined using a (\dl{|}) symbol are said to inherit from the
 associated types, whilst the latter definition introduces a new record type. The
 expression type manages to represent both unary, binary and constant expressions at the same time,
-by distinguishing each case with the help of the \textit{base} field. If base is of type
-\textit{SymbolicInput} then the latter \textit{Expr} fields are nil, whilst in the case of
-base being of \textit{Operator} at least the first of the Expr fields is indeed an expression.
+by distinguishing each case with the help of the \emph{base} field. If base is of type
+\emph{SymbolicInput} then the latter \emph{Expr} fields are nil, whilst in the case of
+base being of \emph{Operator} at least the first of the Expr fields is indeed an expression.
 For each distinct expression we also preserve its type, which can either be
-\textit{PrimitiveType} or \textit{ReferenceType}. Those types are the building blocks for the
+\emph{PrimitiveType} or \emph{ReferenceType}. Those types are the building blocks for the
 construction of the program's expression. It may come natural to the reader that
-the encoding leads to complex expression trees.
+the encoding leads to complex \emph{expression trees}. This expression type is essentially
+what powers our declarative symbolic reasoning approach, encoding both the primitive
+expressions of the input program and its control flow constructs at the same time.
+
+\subsection{Relations}
+
+We here provide a brief presentation of the \emph{main} declared relations that make our
+approach work in figure \ref{fig:main-relations}.
+
+\begin{figure}[th]
+  \declkeyword \tab \rel{ResolveExpr}{meth: Method, var: symbol, expr: Expr}\\
+  \declkeyword \tab \rel{isExpr}{expr: Expr}\\
+  \declkeyword \tab \rel{isArithmeticExpr}{expr: Expr}\\
+  \declkeyword \tab \rel{isReferenceExpr}{expr: Expr}\\
+  \declkeyword \tab \rel{isBooleanExpr}{expr: Expr}\\
+  \declkeyword \tab \rel{isBooleanExprLeftRight}{exprOther: Expr, exprX: Expr, exprY: Expr,\\
+    \hspace*{60mm}op: Operator}\\
+  \declkeyword \tab \rel{isBooleanExprLeftRightInMethod}{exprOther: Expr, exprX: Expr, exprY: Expr,\\
+    \hspace*{76mm}op: Operator, meth: Method}\\
+  \declkeyword \tab \rel{BuildPathExprBefore}{meth:Method, prev:Instruction, exprBase: Expr,\\
+    \hspace*{51mm} insn:Instruction}\\
+  \declkeyword \tab \rel{PathExpressionBefore}{meth:Method, insn: Instruction, pathExpr: Expr}\\
+  \declkeyword \tab \rel{PathExpressionAfterTrue}{meth: Method, insn: Instruction, pathExpr: Expr}\\
+  \declkeyword \tab \rel{PathExpressionAfterFalse}{meth: Method, insn: Instruction, pathExpr: Expr}\\
+  \declkeyword \tab \rel{ExprImpliesOther}{expr: Expr, exprOther: Expr}\\
+  \declkeyword \tab \rel{ExprIsAlwaysTrue}{expr: Expr}\\
+  \declkeyword \tab \rel{ExprIsAlwaysFalse}{expr: Expr}\\
+  \declkeyword \tab \rel{ExprIsNegationOfOther}{expr: Expr, exprOther: Expr}\\
+  \captionof{figure}{Main Symbolic Reasoning relations}
+  \label{fig:main-relations}
+\end{figure}
+
+Those relations and their associated rules are going to be thoroughly described in the
+following section where we will be introducing the main parts of \emph{declarative symbolic reasonig}.
+\emph{ResolveExpr} is the main relation that constructs the program's expressions that yield
+from the input statements and expressions, whilst the \emph{PathExpression*} relations are responsible
+for the construction of the control flow expressions, that is essentially encoding the
+branches taken up to as specific program point. Lastly, our declarative symbolic reasoner
+is powered by the rules of \emph{ExprImpliesOther}, \emph{ExprIsAlwaysTrue}, \emph{ExprIsAlwaysFalse}
+and \emph{ExprIsNegationOfOther} relations, attempting to prove \emph{implications} between the expressions
+and assert those that hold \emph{true} or \emph{false} equivalently, if possible.
+
+\section{Program Expression Trees}
+
+% Expressions produced by the resolve expr for the example program
+% Description of the rules related to the ResolveExpr relation, omitting some details
 
 \section{Path Expressions}
-
+% Path expressions based on the example program
 
 \section{Boolean Symbolic Reasoning}
-
+% Expression reasoning for the program
 
 \subsection{Propositional Logic Axioms}
-
 
 \subsection{Propositional Logic Inference Rules}
