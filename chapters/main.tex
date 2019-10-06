@@ -169,7 +169,7 @@ with meaningful results we have to generate its world of expressions. To that en
 have introduced several rules that build expression trees from the given program's
 input relations which essentially encode the expressions of a program in a symbolic
 manner. The first set of those rules originate from the \emph{ResolveExpr} relation
-that was declared in \ref{fig:main-relations} of the previous section.
+that was declared in figure \ref{fig:main-relations} of the previous section.
 
 The ResolveExpr rules are divided into two sets of rules. The ones that encode
 the base, \emph{symbolic input} expressions and those that lead to the construction of the
@@ -179,7 +179,7 @@ results, (c) instance and static fields loading, (d) numeric constant assignment
 (e) phi assignments as symbolic inputs. Those input cases form the basis of our
 expressions, and it also worts mentioning that our reasoner mainly asserts any new
 knowledge in an intra-procedural fashion. The rules for the enumerated symbolic
-input expressions are presented in the following figures.\\
+input expressions are presented in the following figures.
 
 \begin{figure}[h]
 \begin{minipage}{.5\textwidth}
@@ -192,7 +192,7 @@ input expressions are presented in the following figures.\\
          \rel{isReferenceType}{?type}},\\
   \rel{AssignInstruction\_To}{?insn, ?var},\\
   \rel{Instruction\_Method}{?insn, ?meth},\\
-  \record{?expr}\singlefieldbrackets{?param, ?type, nil, nil}.\\
+  \record{?expr}\singlefieldbrackets{?param, ?type, nil, nil}.
   \captionof{figure}{(a) method parameter}
   \label{fig:params-a}
 \end{minipage}%
@@ -205,7 +205,7 @@ input expressions are presented in the following figures.\\
       \rel{isReferenceType}{?type}},\\
   \rel{Instruction\_Method}{?insn, ?meth},\\
   \rel{AssignReturnValue}{?insn, ?var},\\
-  \record{?expr}\singlefieldbrackets{?param, ?type, nil, nil}.\\\\
+  \record{?expr}\singlefieldbrackets{?param, ?type, nil, nil}.\\
   \captionof{figure}{(b) method invocation results}
   \label{f:result-b}
 \end{minipage}
@@ -265,8 +265,88 @@ input expressions are presented in the following figures.\\
   \end{minipage}
 \end{figure}
 
+The various relations used in the rules bodies are quite self-explanatory
+which proves the expressiveness and high quality of \doop{}'s code.
+In the following figures we present the recursive rules that apply for the
+cases of (a) local variable assignments, (b) unary assignments,
+(c) binary expression assignments and (d) if conditions.
+
+\begin{figure}[th]
+  \begin{minipage}{.54\textwidth}
+    \rel{ResolveExpr}{?meth, ?var, ?expr} \rulearrow\\
+    \rel{Instruction\_Method}{?insn, ?meth}\\
+    \rel{isAssignLocal\_Insn}{?insn},\\
+    \rel{AssignInstruction\_To}{?insn, ?var},\\
+    \rel{Var\_Type}{?var, ?type},\\
+    \rel{}{\rel{isPrimitiveType}{?type} ;\\
+      \rel{isReferenceType}{?type}},\\
+    \record{c}\singlefield{count: \rel{AssignInstruction\_To}{\_, ?var}},\\
+    \recordname{c}\singlefield{ = 1}, \rel{AssicnLocal\_From}{?insn, ?from},\\
+    \rel{ResolveExpr}{?meth, ?from, ?expr}.\\
+  \end{minipage}
+  \begin{minipage}{.46\textwidth}
+    \rel{ResolveExpr}{?meth, ?var, ?expr} \rulearrow\\
+    \rel{isAssignUnop\_Insn}{?insn},\\
+    \rel{AssignInstruction\_To}{?insn, ?var},\\
+    \rel{Var\_Type}{?var, ?type},\\
+    \rel{}{\rel{isPrimitiveType}{?type} ;\\
+      \rel{isReferenceType}{?type}},\\
+    \rel{Instruction\_Method}{?insn, ?meth},\\
+    \rel{AssignOper\_From}{?insn, \_, ?right},\\
+    \rel{\_OperatorAt}{?insn, ?op},\\
+    \rel{ResolveExpr}{?meth, ?right, ?rExpr},\\
+    \record{?expr}\singlefieldbrackets{?op, ?type, ?rExpr, nil}.
+  \end{minipage}
+  \captionof{figure}{(a) local variable and (b) unary assignments}
+  \label{fig:local-unary-ass}
+  \begin{minipage}{.55\textwidth}
+    \rel{ResolveExpr}{?meth, ?var, ?expr} \rulearrow\\
+    \rel{FUNCTION}{?var, ?right1, ?right2, ?op},\\
+    \rel{Var\_Type}{?var, ?type},\\
+    \rel{}{\rel{isPrimitiveType}{?type} ;\\
+      \rel{isReferenceType}{?type}},\\
+    \rel{ResolveExpr}{?meth, ?right1, ?lExpr},\\
+    \rel{ResolveExpr}{?meth, ?right2, ?rExpr},\\
+    \record{?expr}\singlefieldbrackets{?op, ?type, ?lExpr, ?rExpr}.
+  \end{minipage}
+  \begin{minipage}{.46\textwidth}
+    \rel{ResolveExpr}{?meth, ?var, ?expr} \rulearrow\\
+    \rel{FUNCTION}{?var, ?right1, ?right2, ?op},\\
+    \rel{ResolveExpr}{?meth, ?right1, ?lExpr},\\
+    \rel{ResolveExpr}{?meth, ?right2, ?rExpr},\\
+    \record{?expr}\singlefieldbrackets{?op, "boolean", ?lExpr, ?rExpr}.
+  \end{minipage}
+  \captionof{figure}{(c) binary assignments and (d) if conditions}
+  \label{fig:bin-ass-if-cond}
+\end{figure}
+
+For simplicity, several details have been omitted from the rules as defined in
+figure \ref{fig:bin-ass-if-cond} and they have been hidden under the \emph{FUNCTION} relation.
+This function relation is demonstration purposed only and it is responsible to emit
+the appropriate variables and generate their corresponding expressions in either
+case of binary expression assignment or if conditions for the rules to work.
+It essentially attempts to generate the appropriate combination of operands
+and expressions based on whether an operand is a constant or a variable.
+
+% TODO: ResolveExpr relation facts produced for example Java program
+
+As previously mentioned, the rules presented in this section constitute
+one of the most fundamental parts of our reasoner. They construct the
+most primitive, yet essential expressions of the anlyzed program. However,
+the expressions are guarded in a sense that if unrolled, they would all
+lead to complex expressions between symbolic expressions. We shall mention
+here that any reasoning is purely symbolic, and thus there is not any concrete
+evaluation of the expressions in the sense of constant folding. One could also
+notice that even though the lack of boolean expressions up to this point. That
+is due to the SSA IR upon which any reasoning happens. The various branches,
+however complex they are are split into multiple simplified ones and thus we
+have to kee track of these. In the following section we provide an overview of
+the algorithm responsible for generating those boolean expressions that encode
+the control flow construcs of the methods of the input program.
+
 \section{Path Expressions}
-% Path expressions based on the example program
+
+% TODO: Path expressions based on the example program
 
 \section{Boolean Symbolic Reasoning}
 % Expression reasoning for the program
