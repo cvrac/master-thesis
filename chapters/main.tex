@@ -346,9 +346,55 @@ the control flow construcs of the methods of the input program.
 
 \section{Path Expressions}
 
+Any \doop{} reasoning happens on facts produced at a lower level IR
+called Jimple, Soot's IR. Jimple omits several complex constructs,
+such as boolean expressions. In our case though, we need to have an exact
+representation of those high level control flow constructs in order to be
+able to reason about a program and answer several useful questions about
+it. In order to further facilitate and enhance our core symbolic reasoning
+technique we have introduced several algoritms that are responsible for the
+reconstruction of those expressions, that namely represent the program's branch
+conditions or complete path predicates.
+
+% TODO: add jimple CFG of our example program
+
+Even though the analyzed program is quite simplified and the various complex
+control flow structures have been lowered to way simpler forms, the reconstruction
+of the desired predicates is not trivial at all. Complex expressions between operands
+that contain operators such as $\&\&$, $||$ and $!$ have been simplified
+to three-address code (TAC) that completely trim those operators in favour of
+if statements with simplified boolean conditions. Even though we could modify
+the code transformer that lowers the initial program in a way that would avoid those
+transformations, we decided to preserve any external framework functionality as
+it is, implementing any predicate reformation in pure Datalog. Following
+we introduce the algorithm that implements the desired funcionality in two parts.
+For the shake of pure logic formality we consider $\land$, $\lor$ and $\neg$ the equivalents of
+\emph{and}, \emph{or} and \emph{negation} operators.
+
+At first we provide a high level overview of the algorithms responsible
+for the restoration of the boolean predicates. The basis of each predicate is
+the first boolean expression met in the program, that is usual the first
+branch instrucion. The algorithm keeps track of the path predicates at any
+program point before and after each instruction. Each branch instruction splits
+two distinct path predicates, whilst any other instruction does not produce
+any new path predicate but rather emits the predicate that holds at the program
+point before it. However, an instruction may have more than
+a single predecessors that lead the execution path
+up to the program point before it. The decision to consider only a single predecessor
+would lead to inaccurate results as several program paths would have been lost. In
+order for our algorithm to yield sound path predicates we join the
+expressions that hold after each predecessor at the program point before such an
+instruction. Recall that any reasoning is symbolic and there is not any cocrete
+evaluation, thus we can not be sure of what path predicates should be discarded.
+This brief introduction reveals that our algorithm needs to implement
+the following two functionalities: (a) the enumeration of all possible predecessors
+of an instruction and (b) the making of the path predicates for every program
+point.
+
 % TODO: Path expressions based on the example program
 
 \section{Boolean Symbolic Reasoning}
+
 % Expression reasoning for the program
 
 \subsection{Propositional Logic Axioms}
