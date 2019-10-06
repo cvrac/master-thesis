@@ -156,12 +156,114 @@ for the construction of the control flow expressions, that is essentially encodi
 branches taken up to as specific program point. Lastly, our declarative symbolic reasoner
 is powered by the rules of \emph{ExprImpliesOther}, \emph{ExprIsAlwaysTrue}, \emph{ExprIsAlwaysFalse}
 and \emph{ExprIsNegationOfOther} relations, attempting to prove \emph{implications} between the expressions
-and assert those that hold \emph{true} or \emph{false} equivalently, if possible.
+and assert those that hold \emph{true} or \emph{false} equivalently, if possible.\\
 
 \section{Program Expression Trees}
 
 % Expressions produced by the resolve expr for the example program
 % Description of the rules related to the ResolveExpr relation, omitting some details
+
+Introducing a Souffle type that represents a program's expressions is only one
+step towards symbolic reasoning of a program. For our reasoner to be able to provide us
+with meaningful results we have to generate its world of expressions. To that end, we
+have introduced several rules that build expression trees from the given program's
+input relations which essentially encode the expressions of a program in a symbolic
+manner. The first set of those rules originate from the \emph{ResolveExpr} relation
+that was declared in \ref{fig:main-relations} of the previous section.
+
+The ResolveExpr rules are divided into two sets of rules. The ones that encode
+the base, \emph{symbolic input} expressions and those that lead to the construction of the
+complex composite expressions. Symbolic input expressions namely represent the
+symbolic inputs of a method. We consider (a) method parameters, (b) method invocation
+results, (c) instance and static fields loading, (d) numeric constant assignments and
+(e) phi assignments as symbolic inputs. Those input cases form the basis of our
+expressions, and it also worts mentioning that our reasoner mainly asserts any new
+knowledge in an intra-procedural fashion. The rules for the enumerated symbolic
+input expressions are presented in the following figures.\\
+
+\begin{figure}[h]
+\begin{minipage}{.5\textwidth}
+  \rel{ResolveExpr}{?meth, ?var, ?expr} \rulearrow\\
+  \rel{isAssignLocal\_Insn}{?insn},\\
+  \rel{AssignLocal\_From}{?insn, ?param},\\
+  \rel{FormalParam}{\_, ?meth, ?param},\\
+  \rel{Var\_Type}{?param, ?type},\\
+  \rel{}{\rel{isPrimitiveType}{?type} ;\\
+         \rel{isReferenceType}{?type}},\\
+  \rel{AssignInstruction\_To}{?insn, ?var},\\
+  \rel{Instruction\_Method}{?insn, ?meth},\\
+  \record{?expr}\singlefieldbrackets{?param, ?type, nil, nil}.\\
+  \captionof{figure}{(a) method parameter}
+  \label{fig:params-a}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \rel{ResolveExpr}{?meth, ?var, ?expr} \rulearrow\\
+  \rel{isMethodInvocation}{?insn},\\
+  \rel{MethodInvocation\_Method}{?insn, ?sig},\\
+  \rel{Method\_ReturnType}{?sig, \_, ?type},\\
+  \rel{}{\rel{isPrimitiveType}{?type} ;\\
+      \rel{isReferenceType}{?type}},\\
+  \rel{Instruction\_Method}{?insn, ?meth},\\
+  \rel{AssignReturnValue}{?insn, ?var},\\
+  \record{?expr}\singlefieldbrackets{?param, ?type, nil, nil}.\\\\
+  \captionof{figure}{(b) method invocation results}
+  \label{f:result-b}
+\end{minipage}
+\end{figure}
+
+\begin{figure}[th]
+  \begin{minipage}{.5\textwidth}
+    \rel{ResolveExpr}{?meth, ?var, ?expr} \rulearrow\\
+    \rel{isLoadInstanceField\_Insn}{?insn},\\
+    \rel{LoadInstanceField\_To}{?insn, ?var},\\
+    \rel{Var\_Type}{?var, ?type},\\
+    \rel{}{\rel{isPrimitiveType}{?type} ;\\ \rel{isReferenceType}{?type}},\\
+    \rel{Instruction\_Method}{?insn, ?meth},\\
+    \record{?expr}\singlefieldbrackets{?var, ?type, nil, nil}.\\
+    \captionof{figure}{(c) load instance fields}
+    \label{fig:field-c}
+  \end{minipage}
+  \begin{minipage}{.5\textwidth}
+    \rel{ResolveExpr}{?meth, ?var, ?expr} \rulearrow\\
+    \rel{isLoadInstanceField\_Insn}{?insn},\\
+    \rel{LoadInstanceField\_To}{?insn, ?var},\\
+    \rel{Var\_Type}{?var, ?type},\\
+    \rel{}{\rel{isPrimitiveType}{?type} ;\\ \rel{isReferenceType}{?type}},\\
+    \rel{Instruction\_Method}{?insn, ?meth},\\
+    \record{?expr}\singlefieldbrackets{?var, ?type, nil, nil}.\\
+    \captionof{figure}{(d) load static fields}
+    \label{fig:field-d}
+  \end{minipage}
+\end{figure}
+
+\begin{figure}[th]
+  \begin{minipage}{.5\textwidth}
+    \rel{ResolveExpr}{?meth, ?var, ?expr} \rulearrow\\
+    \rel{isAssignNumConstant\_Insn}{?insn},\\
+    \rel{AssignInstruction\_To}{?insn, ?var},\\
+    \rel{Var\_Type}{?var, ?type},\\
+    \rel{}{\rel{isPrimitiveType}{?type} ;\\
+      \rel{isReferenceType}{?type}},\\
+    \rel{Instruction\_Method}{?insn, ?meth},\\
+    \rel{AssignNumConstant\_Id}{?insn, ?const},\\
+    \record{?expr}\singlefieldbrackets{?const, ?type, nil, nil}.
+  \captionof{figure}{(e) numeric assignments}
+  \label{fig:ass-num}
+  \end{minipage}
+  \begin{minipage}{.5\textwidth}
+    \rel{ResolveExpr}{?meth, ?var, ?expr} \rulearrow\\
+    \rel{Instruction\_Method}{?insn, ?meth}\\
+    \rel{isAssignLocal\_Insn}{?insn},\\
+    \rel{AssignInstruction\_To}{?insn, ?var},\\
+    \rel{Var\_Type}{?var, ?type},\\
+    \rel{}{\rel{isPrimitiveType}{?type} ;\\
+      \rel{isReferenceType}{?type}},\\
+    \record{c}\singlefield{count: \rel{AssignInstruction\_To}{\_, ?var}},\\
+    \recordname{c}\singlefield{ > 1}, \record{?expr}\singlefieldbrackets{?var, ?type, nil, nil}.
+  \captionof{figure}{(f) phi assignments}
+  \label{fig:phi-ass}
+  \end{minipage}
+\end{figure}
 
 \section{Path Expressions}
 % Path expressions based on the example program
