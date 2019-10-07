@@ -391,6 +391,70 @@ the following two functionalities: (a) the enumeration of all possible predecess
 of an instruction and (b) the making of the path predicates for every program
 point.
 
+In the following figures we are going to introduce the algorithmic parts responsible
+for the instruction predecessors enumeration. The whole logic is implemented in
+pure Datalog rules like the rest of our work. \doop{} contains a set of rules
+populating relations that represent various control flow constructs, such as
+the set of basic blocks in each function which we made use of. The simplest case
+of this enumeration is the single predecessor case. We present the relations
+and the associated rules for this one, along with the \emph{helper} rules that populate the
+relations which keep track of the first and last predecessor of an instruction in
+the following figures.
+
+\begin{figure}[th]
+  \begin{minipage}{.7\textwidth}
+    \begin{tabular}{l}
+  \rel{SinglePredOfInsnInMethod}{?pred, ?insn, ?meth} \rulearrow\\
+  \tab \rel{Instruction\_Method}{?insn, ?meth},\\
+  \tab \rel{FirstPredOfInsnInMethod}{?meth, ?pred, ?insn},\\
+  \tab \rel{LastPredOfInsnInMethod}{?meth, ?pred, ?insn}.
+\end{tabular}
+  \captionof{figure}{Single predecessor rules.}
+  \label{fig:single-pred}
+\end{minipage}
+\begin{minipage}{.7\textwidth}
+  \begin{tabular}{l}
+  \rel{FirstPredOfInsnInMethodOrdinal}{?meth, ?firstOrd, ?insn} \rulearrow \\
+  \tab \rel{Instruction\_Method}{?insn, ?meth},\\
+  \tab \recordname{?firstOrd}\singlefield{ = min ord(?prev): \rel{MayPredecessorModuloThrow}{?prev, ?insn}}.\\\\
+  \rel{FirstPredOfInsnInMethod}{?meth, ?first, ?insn} \rulearrow \\
+  \tab \rel{Instruction\_Method}{?insn, ?meth},\\
+  \tab \rel{MayPredecessorModuloThrow}{?first, ?insn},\\
+  \tab \recordname{?min\_ord}\singlefield{ = ord(?first)},\\
+  \tab \rel{FirstPredOfInsnInMethodOrdinal}{?meth, ?min\_ord, ?insn}.
+\end{tabular}
+  \captionof{figure}{First predecessor of instruction in method}
+  \label{fig:first-pred}
+\end{minipage}
+\begin{minipage}{.7\textwidth}
+  \begin{tabular}{l}
+  \rel{LastPredOfInsnInMethodOrdinal}{?meth, ?lastOrd, ?insn} \rulearrow \\
+  \tab \rel{Instruction\_Method}{?insn, ?meth},\\
+  \tab \recordname{?lastOrd}\singlefield{ = max ord(?prev): \rel{MayPredecessorModuloThrow}{?prev, ?insn}}.\\\\
+  \rel{LastPredOfInsnInMethod}{?meth, ?last, ?insn} \rulearrow \\
+  \tab \rel{Instruction\_Method}{?insn, ?meth},\\
+  \tab \rel{MayPredecessorModuloThrow}{?last, ?insn},\\
+  \tab \recordname{?max\_ord}\singlefield{ = ord(?last)},\\
+  \tab \rel{LastPredOfInsnInMethodOrdinal}{?meth, ?max\_ord, ?insn}.
+\end{tabular}
+\captionof{figure}{Last predecessor of instruction in method}
+\label{fig:last-pred}
+\end{minipage}
+\end{figure}
+
+The above rules introduce the handling of the least complicated cases. With just
+a few rules we manage to identify the one and only predecessor of an instruction.
+In figure \ref{fig:single-pred} we present the rule that populates the relation
+keeping track of the single predecessors of an instruction which is powered by
+the rules of FirstPredOfInsnInMethod and LastPredOfInsnInMethod relations. In those
+two presented in figures \ref{fig:first-pred} and \ref{fig:last-pred} we leverage
+\doop{}'s control-flow graph (CFG) analysis by using the
+MayPredecessorModuloThrow relation that provides us with the predecessors of an
+instrucion. We further aggregate with the help of min and max aggregation functions
+of Souffle in order to distinguish the first and last predecessors of an instruction
+accordingly.
+
+
 % TODO: Path expressions based on the example program
 
 \section{Boolean Symbolic Reasoning}
