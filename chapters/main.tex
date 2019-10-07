@@ -662,18 +662,255 @@ declarative symbolic reasoning.
 A symbolic reasoner mainly deduces knowledge about the expressions of a program and may get
 as complex as one wants to. Such tool is essentially a theorem prover that given a
 friendly input representation and a set of guiding facts tries to reason about a program
-by constructing proofs with the help of a set of inferrence rules. In the context of this
+by constructing formal proofs with the help of a set of inference rules. In the context of this
 work we have introduced a fundamental symbolic reasoner that mainly deduces knowledge about the
 boolean expressions of a program in a purely symbolic manner. That is, our reasoner
 contains pure propositional logic formulas and it
 does not concretely evaluate any expression on the fly, but rather constantly emits
 new knowledge until a fixpoint is reached: there can be no more knowledge produced by
-the set of inferrence rules. In this chapter we exhibit the core implementation of our
-reasoner by describing the set of propositional logic axioms and inferrence rules that
+the set of inference rules. In this chapter we exhibit the core implementation of our
+reasoner by describing the set of propositional logic axioms and inference rules that
 bring into life our technique. The whole of those axioms and rules are implemented as
 pure Datalog rules, without the help of any external tool. The main work of the reasoner
-is to ask the question of \emph{``What are the program expressions that are implied by another program expression?"}.
+is to ask the question of \emph{``What are the program expressions that may be implied by another program expression?"}.
+
+The main relation of the core reasoning algorithm is the ExprImpliesOther relation. Formally,
+this relation represents the following logical statement:\\
+
+\begin{equation}
+  \label{eq:implies}
+  \begin{aligned}
+    P \rightarrow Q
+  \end{aligned}
+\end{equation}
+
+where $P$ and $Q$ represent any logical (boolean) formula.
 
 \subsection{Propositional Logic Axioms}
 
+We begin with the enumeration of the axioms that constitute the basis of our reasoner.
+In the following figures we present the Datalog rules describing those axioms.
+
+\begin{figure}[th]
+  \centering
+\begin{minipage}{1.\textwidth}
+     \begin{tabular}{l}
+     \rel{ExprImpliesOther}{?expr, ?expr} \rulearrow \\
+     \tab \rel{isBooleanExpr}{?expr}.
+    \end{tabular}
+  \captionof{figure}{Self implication}
+  \label{fig:self-implication}
+\end{minipage}
+\begin{minipage}{1.\textwidth}
+  \begin{tabular}{l}
+    \rel{ExprImpliesOther}{?expr, ?exprLeft},\\
+    \rel{ExprImpliesOther}{?expr, ?exprRight} \rulearrow\\
+    \tab \rel{isBooleanExprLeftRightInMethod}{?expr, ?exprLeft, ?exprRight, "\&\&", ?meth}.
+  \end{tabular}
+  \captionof{figure}{$A \land B \rightarrow A$ and $A \land B \rightarrow B$}
+  \label{fig:and}
+\end{minipage}
+\begin{minipage}{1.\textwidth}
+  \begin{tabular}{l}
+    \rel{ExprImpliesOther}{?expr, ?exprLeft},\\
+    \rel{ExprImpliesOther}{?expr, ?exprRight} \rulearrow\\
+    \tab \rel{isBooleanExprLeftRightInMethod}{?expr, ?exprLeft, ?exprRight, "\&\&", ?meth}.
+  \end{tabular}
+  \captionof{figure}{$A \rightarrow A \lor B$ and $B \rightarrow A \lor B$}
+  \label{fig:or}
+\end{minipage}
+\begin{minipage}{1.\textwidth}
+  \begin{tabular}{l}
+    \rel{ExprImpliesOther}{?expr, ?exprOther} \rulearrow\\
+    \tab \rel{isBooleanExprLeftRightInMethod}{?expr, ?exprLeft, ?exprRight, "\&\&", ?meth},\\
+    \tab \rel{isBooleanExprLeftRightInMethod}{?exprOther, ?exprRight, ?exprLeft, "\&\&", ?meth}.
+  \end{tabular}
+  \captionof{figure}{$A \land B \rightarrow B \land A$}
+  \label{fig:and-commutativity}
+  \end{minipage}
+\end{figure}
+
+\begin{figure}[th]
+  \begin{minipage}{1.\textwidth}
+    \begin{tabular}{l}
+      \rel{ExprImpliesOther}{?expr, ?exprOther} \rulearrow\\
+      \tab \rel{isBooleanExprLeftRightInMethod}{?expr, ?exprLeft, ?exprRight, "||", ?meth},\\
+      \tab \rel{isBooleanExprLeftRightInMethod}{?exprOther, ?exprRight, ?exprLeft, "||", ?meth}.
+    \end{tabular}
+    \captionof{figure}{$A \lor B \rightarrow B \lor A$}
+    \label{fig:or-commutativity}
+  \end{minipage}
+
+  \begin{minipage}{1.\textwidth}
+  \begin{tabular}{l}
+    \rel{ExprImpliesOther}{?expr, ?exprOther} \rulearrow\\
+    \tab \rel{isBooleanExprLeftRightInMethod}{?expr, ?exprLeft, ?exprRight, "\&\&", ?meth},\\
+    \tab \record{?exprOr}\singlefieldbrackets{"||", "boolean", ?exprB, ?exprC},\\
+    \tab \record{?exprLeft}\singlefieldbrackets{"\&\&", "boolean", ?exprA, ?exprB},\\
+    \tab \record{?exprRight}\singlefieldbrackets{"\&\&", "boolean", ?exprA, ?exprC},\\
+    \tab \record{?exprOther}\singlefieldbrackets{"||", "boolean", ?exprLeft, ?exprRight}.\\
+  \end{tabular}
+  \captionof{figure}{$A \land (B \lor C) \rightarrow (A \land B) \lor (A \land C)$}
+  \label{fig:distributive-and-a}
+  \end{minipage}
+
+  \begin{minipage}{1.\textwidth}
+  \begin{tabular}{l}
+    \rel{ExprImpliesOther}{?expr, ?exprOther} \rulearrow\\
+    \tab \rel{isBooleanExprLeftRightInMethod}{?expr, ?exprLeft, ?exprRight, "\&\&", ?meth},\\
+    \tab \record{?exprLeft}\singlefieldbrackets{"\&\&", "boolean", ?exprA, ?exprB},\\
+    \tab \record{?exprRight}\singlefieldbrackets{"\&\&", "boolean", ?exprA, ?exprC},\\
+    \tab \record{?exprNRight}\singlefieldbrackets{"||", "boolean", ?exprB, ?exprC},\\
+    \tab \record{?exprOther}\singlefieldbrackets{"\&\&", "boolean", ?exprA, ?exprNRight}.\\
+  \end{tabular}
+  \captionof{figure}{$(A \land B) \lor (A \land C) \rightarrow A \land (B \lor C)$}
+  \label{fig:distributive-and-b}
+  \end{minipage}
+
+\begin{minipage}{1.\textwidth}
+  \begin{tabular}{l}
+    \rel{ExprImpliesOther}{?expr, ?exprOther} \rulearrow\\
+    \tab \record{?exprBC}\singlefieldbrackets{"\&\&", "boolean", ?exprB, ?exprC},\\
+    \tab \rel{isBooleanExprLeftRightInMethod}{?expr, ?exprA, ?exprAB, "||", ?meth},\\
+    \tab \record{?exprLeft}\singlefieldbrackets{"||", "boolean", ?exprA, ?exprB},\\
+    \tab \record{?exprRight}\singlefieldbrackets{"||", "boolean", ?exprA, ?exprC},\\
+    \tab \rel{isBooleanExprLeftRightInMethod}{?exprOther, ?exprLeft, ?exprRight, "\&\&", ?meth}.
+  \end{tabular}
+  \captionof{figure}{$A \lor (B \land C) \rightarrow (A \lor B) \land (A \lor C)$}
+  \label{fig:distributive-or-a}
+\end{minipage}
+
+\begin{minipage}{1.\textwidth}
+  \begin{tabular}{l}
+    \rel{ExprImpliesOther}{?expr, ?exprOther} \rulearrow\\
+    \tab \record{?exprAB}\singlefieldbrackets{"||", "boolean", ?exprA, ?exprB},\\
+    \tab \record{?exprBC}\singlefieldbrackets{"||", "boolean", ?exprB, ?exprC},\\
+    \tab \rel{isBooleanExprLeftRightInMethod}{?expr, ?exprAB, ?exprBC, "\&\&", ?meth},\\
+    \tab \record{?exprRight}\singlefieldbrackets{"\&\&", "boolean", ?exprB, ?exprC},\\
+    \tab \rel{isBooleanExprLeftRightInMethod}{?exprOther, ?exprA, ?exprRight, "\&\&", ?meth}.
+  \end{tabular}
+  \captionof{figure}{$(A \lor B) \land (A \lor C) \rightarrow A \lor (B \land C)$}
+  \label{fig:distributive-or-b}
+\end{minipage}
+\end{figure}
+
 \subsection{Propositional Logic Inference Rules}
+
+The axioms described before form the ground truth for the reasoner. However, for the
+reasoner to infer new knowledge we have to define a set of inference rules. An inference
+rule is the actual means of proving. Based on any number of logical premises an inference
+rule infers one or maybe even more conclusions.
+
+The formal definition of a logical inference rule that takes only two premises is the following:
+
+\begin{equation}
+  \label{eq:inference-rule}
+  \begin{aligned}
+    P, P \rightarrow Q \vdash Q
+  \end{aligned}
+\end{equation}
+
+where P and Q are metavariables which are essentially logical sentences that may consist
+of multiple logical statements.\\
+
+An equivalent definition of the equation \ref{eq:inference-rule}, also known as the
+\emph{modus ponens} is:
+
+\begin{equation}
+  \label{eq:modus-ponens}
+  \begin{aligned}
+  \begin{array}{rl}
+    & P,  P \to Q \\
+    \cline{2-2}
+    & Q
+  \end{array}
+  \end{aligned}
+\end{equation}
+
+Based on the definitions above we introduce a set of inference rules that are the ones
+responsible to power up our analysis.
+
+\begin{figure}[th]
+  \centering
+\begin{minipage}{1.\textwidth}
+  \begin{tabular}{l}
+    \rel{ExprImpliesOther}{?expr, ?exprOther} \rulearrow\\
+    \tab \rel{ExprImpliesOther}{?expr, ?exprInter},\\
+    \tab \rel{ExprImpliesOther}{?exprInter, ?exprOther}.
+  \end{tabular}
+  \captionof{figure}{$A \rightarrow B$ and $B \rightarrow C \vdash A \rightarrow C$}
+  \label{fig:rule-a}
+\end{minipage}
+\begin{minipage}{1.\textwidth}
+  \begin{tabular}{l}
+    \rel{ExprImpliesOther}{?exprA, ?exprOther} \rulearrow\\
+    \tab \rel{isBooleanExprLeftRightInMethod}{?exprOther, ?exprB, ?exprC, "\&\&", ?meth}.\\
+    \tab \rel{ExprImpliesOther}{?exprA, ?exprB},\\
+    \tab \rel{ExprImpliesOther}{?exprA, ?exprC}.
+  \end{tabular}
+  \captionof{figure}{$A \rightarrow B$ and $A \rightarrow C \vdash A \rightarrow B \land C$}
+  \label{fig:rule-b}
+\end{minipage}
+\begin{minipage}{1.\textwidth}
+  \begin{tabular}{l}
+    \rel{ExprImpliesOther}{?exprLeft, ?exprA} \rulearrow\\
+    \tab \rel{isBooleanExprLeftRightInMethod}{?exprLeft, ?exprB, ?exprC, "||", ?meth}.\\
+    \tab \rel{ExprImpliesOther}{?exprB, ?exprA},\\
+    \tab \rel{ExprImpliesOther}{?exprC, ?exprA}.
+  \end{tabular}
+  \captionof{figure}{$B \rightarrow A$ and $C \rightarrow A \vdash B \lor C \rightarrow A$}
+  \label{fig:rule-c}
+\end{minipage}
+\begin{minipage}{1.\textwidth}
+  \begin{tabular}{l}
+    \rel{ExprImpliesOther}{?exprBNeg, ?exprANeg} \rulearrow\\
+    \tab \rel{ExprIsNegationOfOther}{?exprA, ?exprANeg},\\
+    \tab \rel{ExprIsNegationOfOther}{?exprB, ?exprBNeg}.
+  \end{tabular}
+  \captionof{figure}{$A \rightarrow B$ and $\neg B$ and $\neg A \vdash \neg B \rightarrow \neg A$}
+  \label{fig:rule-d}
+\end{minipage}
+\begin{minipage}{1.\textwidth}
+  \begin{tabular}{l}
+    \rel{ExprImpliesOther}{?expr, ?exprOther} \rulearrow\\
+    \tab \rel{ExprIsAlwaysFalse}{?expr},\\
+    \tab \rel{isBooleanExprLeftRightInMethod}{?expr, \_, \_, \_, ?meth},\\
+    \tab \rel{isBooleanExprLeftRightInMethod}{?exprOther, \_, \_, \_, ?meth}.
+  \end{tabular}
+  \captionof{figure}{$False \vdash False \rightarrow A$}
+  \label{fig:rule-e}
+\end{minipage}
+\begin{minipage}{1.\textwidth}
+  \begin{tabular}{l}
+    \rel{ExprImpliesOther}{?exprOther, ?expr} \rulearrow\\
+    \tab \rel{ExprIsAlwaysTrue}{?expr},\\
+    \tab \rel{isBooleanExprLeftRightInMethod}{?expr, \_, \_, \_, ?meth},\\
+    \tab \rel{isBooleanExprLeftRightInMethod}{?exprOther, \_, \_, \_, ?meth}.
+  \end{tabular}
+  \captionof{figure}{$True \vdash A \rightarrow True$}
+  \label{fig:rule-e}
+\end{minipage}
+\begin{minipage}{1.\textwidth}
+  \begin{tabular}{l}
+    \rel{ExprImpliesOther}{?expr, ?exprOther} \rulearrow\\
+    \tab \rel{ExprImpliesOther}{?expr, ?exprCompOther},\\
+    \tab \record{?exprCompOther}\singlefieldbrackets{"||", ?type, ?exprOther, ?exprFalse},\\
+    \tab \rel{ExprIsAlwaysFalse}{?exprFalse}.
+  \end{tabular}
+  \captionof{figure}{$A \rightarrow (B \lor False) \vdash A \rightarrow B$}
+  \label{fig:rule-e}
+\end{minipage}
+\end{figure}
+
+\begin{figure}[t]
+  \begin{tabular}{l}
+    \rel{ExprImpliesOther}{?expr, ?exprOther} \rulearrow\\
+    \tab \rel{ExprImpliesOther}{?exprCompOther, ?exprOther},\\
+    \tab \record{?exprCompOther}\singlefieldbrackets{"\&\&", ?type, ?expr, ?exprTrue},\\
+    \tab \rel{ExprIsAlwaysTrue}{?exprTrue}.
+  \end{tabular}
+  \captionof{figure}{$A \land True \rightarrow B \vdash A \rightarrow B$}
+  \label{fig:rule-f}
+\end{figure}
+
+% TODO: Add arithmetic axioms
