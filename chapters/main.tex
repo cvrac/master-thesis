@@ -521,12 +521,50 @@ decided to provide an interim relation which when negated yields the next predec
 in the enumeration. The rule feeding that relation, named NotNextPredOfInsnInMethod, considers
 the previous and next possible predecessor of an instruction and asserts that in case there is
 another one between them the rule shall fail. Thus, the negation of this relation yields the
-actual next possible predecessors which are then used to proceed with the enumeration. Lastly,
-after introducing the part responsible for the predecessors enumeration,
+actual next possible predecessors which are then used to proceed with the enumeration.
+
+After introducing the part responsible for the predecessors enumeration,
 we may proceed to the main algorithm that creates the path predicates at every single program
-point.
+point. A high level overview of the algorithm has been provided earlier,
+and we now present the core rules of this part in the following figures. We have already
+introduced the notion of \emph{before} and \emph{after} program points in the context of
+a distinct instruction and at first we describe the rules responsible for the
+construction of the path predicates after an instruction via the PathExpressionAfterTrue and
+PathExpressionAfterFalse relations.
 
+\begin{figure}[th]
+  \begin{tabular}{l}
+    \rel{PathExpressionAfterTrue}{?meth, ?insn, ?cond},\\
+    \rel{PathExpressionAfterFalse}{?meth, ?insn, ?negatedCond} \rulearrow\\
+    \tab \rel{FirstIfInsnInMethod}{?insn, ?meth},\\
+    \tab \rel{NegationOfConditionAtIfInsn}{?cond, ?negatedCond, ?insn}.\\\\
 
+    \rel{PathExpressionAfterTrue}{?meth, ?insn, ?pathExpr1},\\
+    \rel{PathExpressionAfterFalse}{?meth, ?insn, ?pathExpr2} \rulearrow \\
+    \tab \rel{PathExpressionBefore}{?meth, ?insn, ?pathExpr},\\
+    \tab \rel{NegationOfConditionAtIfInsn}{?cond, ?negatedCond, ?insn},\\
+    \tab \record{?cond}\singlefieldbrackets{?op, ?type, ?exprLeft, ?exprRight},\\
+    \tab \record{?pathExpr1}\singlefieldbrackets{"\&\&", ?type, ?cond, ?pathExpr},\\
+    \tab \record{?pathExpr2}\singlefieldbrackets{"\&\&", ?type, ?negatedCond, ?pathExpr}.\\\\
+
+    \rel{PathExpressionAfterTrue}{?meth, ?insn, ?pathExpr} \rulearrow\\
+    \tab \rel{PathExpressionBefore}{?meth, ?insn, ?pathExpr},\\
+    \tab \rel{!isIf\_Insn}{?insn}.
+  \end{tabular}
+  \captionof{figure}{Path expressions after instruction}
+  \label{fig:path-after}
+\end{figure}
+
+The path expression predicates are split into two dsjoint sets of \emph{true} and \emph{false}
+subsets due to the separation of program paths after a branch instruction. A branch
+instruction leads to different execution paths based on whether the condition succeeds or not.
+In order to differentiate between the two, we have introduced the
+NegationOfConditionAtIfInsn relation that
+yields the negated condition of a branch condition that would be used to
+generate the complement of a path predicate. The first rule in \ref{fig:path-after}
+represents the basis of any path predicate formation, whist the second one further
+splits each path predicate into two subsequent expressions. The last rule represents
+the path predicate after any statement that is not a branch instruction.
 
 % TODO: Path expressions based on the example program
 
