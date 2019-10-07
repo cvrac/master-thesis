@@ -551,26 +551,113 @@ PathExpressionAfterFalse relations.
     \tab \rel{PathExpressionBefore}{?meth, ?insn, ?pathExpr},\\
     \tab \rel{!isIf\_Insn}{?insn}.
   \end{tabular}
-  \captionof{figure}{Path expressions after instruction}
+  \captionof{figure}{Path expressions after an instruction}
   \label{fig:path-after}
 \end{figure}
 
 The path expression predicates are split into two dsjoint sets of \emph{true} and \emph{false}
-subsets due to the separation of program paths after a branch instruction. A branch
+conjuncts due to the separation of a program path after a branch instruction. A branch
 instruction leads to different execution paths based on whether the condition succeeds or not.
 In order to differentiate between the two, we have introduced the
 NegationOfConditionAtIfInsn relation that
 yields the negated condition of a branch condition that would be used to
-generate the complement of a path predicate. The first rule in \ref{fig:path-after}
+generate the complement of a path predicate. The first rule in figure \ref{fig:path-after}
 represents the basis of any path predicate formation, whist the second one further
 splits each path predicate into two subsequent expressions. The last rule represents
-the path predicate after any statement that is not a branch instruction.
+the path predicate after any statement that is not a branch instruction. However, those
+rules heavily depend on the existence of path predicates on the program point right
+before each instruction. In figures \ref{fig:path-before} 
+we present the rules of the relations that yield the path predicates at the
+program point before each instruction for the single predecessor case.
 
-% TODO: Path expressions based on the example program
+\begin{figure}[th]
+  \begin{tabular}{l}
+    \rel{PathExpressionBefore}{?meth, ?insn, ?expr} \rulearrow \\
+    \tab \rel{PathExpressionAfterTrue}{?meth, ?pred, ?expr},\\
+    \tab \rel{SinglePredOfInsnInMethod}{?pred, ?insn, ?meth},\\
+    \tab \rel{isIf\_Insn}{?pred}, \rel{isJumpTarget}{?insn}.\\\\
+
+    \rel{PathExpressionBefore}{?meth, ?insn, ?expr} \rulearrow \\
+    \tab \rel{PathExpressionAfterFalse}{?meth, ?pred, ?expr},\\
+    \tab \rel{SinglePredOfInsnInMethod}{?pred, ?insn, ?meth},\\
+    \tab \rel{isIf\_Insn}{?pred}, \rel{!isJumpTarget}{?insn}.\\\\
+
+    \rel{PathExpressionBefore}{?meth, ?insn, ?expr} \rulearrow \\
+    \tab \rel{PathExpressionAfterTrue}{?meth, ?pred, ?expr},\\
+    \tab \rel{SinglePredOfInsnInMethod}{?pred, ?insn, ?meth},\\
+    \tab \rel{!isIf\_Insn}{?pred}.\\\\
+  \end{tabular}
+  \begin{tabular}{l}
+  \end{tabular}
+  \captionof{figure}{Path expressions before an instruction - single predecessor }
+  \label{fig:path-before}
+\end{figure}
+
+The complicated case of the construction of the before-path predicates is essentially when
+an instruction has multiple predecessors that flow up to it. In order to facilitate the
+rules of the relation PathExpressionBefore, we introduced the BuildPathExprBefore relation,
+responsible for constructing a disjunct of all the predecessor path
+expressions that meet at the program point right before the instruction. The former
+relation rules utilize the predecessor enumeration relations introduced before, by
+implicitly enumerating all over the predecessors. Lastly, we present the logic of
+the disjunct formation in figure \ref{fig:path-before-multiple}.
+
+\begin{figure}[h]
+  \begin{tabular}{l}
+    \rel{PathExpressionBefore}{?meth, ?insn, ?pathExpr} \rulearrow\\ 
+    \tab \rel{LastOfMultiplePredsOfInsnInMethod}{?pred, ?insn, ?meth},\\
+    \tab \rel{BuildPathExprBefore}{?meth, ?pred, ?pathExpr, ?insn}.\\
+    \rel{BuildPathExprBefore}{?meth, ?pred,  ?expr, ?insn} \rulearrow\\
+    \tab \rel{FirstOfMultiplePredsOfInsnInMethod}{?pred, ?insn, ?meth},\\
+    \tab \rel{isIf\_Insn}{?pred},\\
+    \tab \rel{IsJumpTarget}{?insn},\\
+    \tab \rel{PathExpressionAfterTrue}{?meth, ?pred, ?expr}.\\
+
+    \rel{BuildPathExprBefore}{?meth, ?pred,  ?expr, ?insn} \rulearrow\\
+    \tab \rel{FirstOfMultiplePredsOfInsnInMethod}{?pred, ?insn, ?meth},\\
+    \tab \rel{isIf\_Insn}{?pred},\\
+    \tab \rel{!IsJumpTarget}{?insn},\\
+    \tab \rel{PathExpressionAfterFalse}{?meth, ?pred, ?expr}.\\
+
+    \rel{BuildPathExprBefore}{?meth, ?pred,  ?expr, ?insn} \rulearrow\\
+    \tab \rel{FirstOfMultiplePredsOfInsnInMethod}{?pred, ?insn, ?meth},\\
+    \tab \rel{!isIf\_Insn}{?pred},\\
+    \tab \rel{PathExpressionAfterTrue}{?meth, ?pred, ?expr}.\\
+
+    \rel{BuildPathExprBefore}{?meth, ?next,  ?pathExpr, ?insn} \rulearrow\\
+    \tab \rel{BuildPathExprBefore}{?meth, ?prev, ?expr, ?insn},\\
+    \tab \rel{NextOfMultiplePredsOfInsnInMethod}{?next, ?prev, ?insn, ?meth},\\
+    \tab \rel{!isIf\_Insn}{?next},\\
+    \tab \rel{PathExpressionAfterTrue}{?meth, ?next, ?exprPrev},\\
+    \tab \record{?pathExpr}\singlefieldbrackets{"||", "boolean", ?expr, ?exprPrev}.\\
+
+    \rel{BuildPathExprBefore}{?meth, ?next,  ?pathExpr, ?insn} \rulearrow\\
+    \tab \rel{BuildPathExprBefore}{?meth, ?prev, ?expr, ?insn},\\
+    \tab \rel{NextOfMultiplePredsOfInsnInMethod}{?next, ?prev, ?insn, ?meth},\\
+    \tab \rel{isIf\_Insn}{?next},\\
+    \tab \rel{isJumpTarget}{?insn},\\
+    \tab \rel{PathExpressionAfterTrue}{?meth, ?next, ?exprPrev},\\
+    \tab \record{?pathExpr}\singlefieldbrackets{"||", "boolean", ?expr, ?exprPrev}.\\
+
+    \rel{BuildPathExprBefore}{?meth, ?next,  ?pathExpr, ?insn} \rulearrow\\
+    \tab \rel{NextOfMultiplePredsOfInsnInMethod}{?next, ?prev, ?insn, ?meth},\\
+    \tab \rel{BuildPathExprBefore}{?meth, ?prev, ?expr, ?insn},\\
+    \tab \rel{isIf\_Insn}{?next},\\
+    \tab \rel{!isJumpTarget}{?insn},\\
+    \tab \rel{PathExpressionAfterTrue}{?meth, ?next, ?exprPrev},\\
+    \tab \record{?pathExpr}\singlefieldbrackets{"||", "boolean", ?expr, ?exprPrev}.
+  \end{tabular}
+  \captionof{figure}{Path expression before multiple predecessors}
+  \label{fig:path-before-multiple}
+\end{figure}
+
+All of the rules introduced in this section generate the boolean logic formulas,
+disjuncts and conjuncts. Those formulas are modeled with the help of the
+expression type introduced during the first sections of this thesis. We may now
+proceed to the description of the core algorithm of our analysis, static
+declarative symbolic reasoning.
 
 \section{Boolean Symbolic Reasoning}
-
-% Expression reasoning for the program
 
 \subsection{Propositional Logic Axioms}
 
