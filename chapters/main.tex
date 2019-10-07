@@ -659,6 +659,21 @@ declarative symbolic reasoning.
 
 \section{Boolean Symbolic Reasoning}
 
+A symbolic reasoner mainly deduces knowledge about the expressions of a program and may get
+as complex as one wants to. Such tool is essentially a theorem prover that given a
+friendly input representation and a set of guiding facts tries to reason about a program
+by constructing proofs with the help of a set of inferrence rules. In the context of this
+work we have introduced a fundamental symbolic reasoner that mainly deduces knowledge about the
+boolean expressions of a program in a purely symbolic manner. That is, our reasoner
+contains pure propositional logic formulas and it
+does not concretely evaluate any expression on the fly, but rather constantly emits
+new knowledge until a fixpoint is reached: there can be no more knowledge produced by
+the set of inferrence rules. In this chapter we exhibit the core implementation of our
+reasoner by describing the set of propositional logic axioms and inferrence rules that
+bring into life our technique. The whole of those axioms and rules are implemented as
+pure Datalog rules, without the help of any external tool. The main work of the reasoner
+is to ask the question of \emph{``What are the program expressions that are implied by another program expression?"}.
+
 \subsection{Propositional Logic Axioms}
 
 \subsection{Propositional Logic Inference Rules}
