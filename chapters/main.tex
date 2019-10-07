@@ -452,7 +452,80 @@ two presented in figures \ref{fig:first-pred} and \ref{fig:last-pred} we leverag
 MayPredecessorModuloThrow relation that provides us with the predecessors of an
 instrucion. We further aggregate with the help of min and max aggregation functions
 of Souffle in order to distinguish the first and last predecessors of an instruction
-accordingly.
+accordingly. Those rules are also utilized during the enumeration of the multiple
+predecessors of a single instruction, but they are wrapped into complex rules that
+separate the multiple to the single predecessor case. We present those wrappers
+in figure \ref{fig:pred-wrappers}.
+
+\begin{figure}[th]
+  \begin{tabular}{l}
+    \rel{FirstOfMultiplePredsOfInsnInMethod}{?pred, ?insn, ?meth} \rulearrow\\
+    \tab \rel{Instruction\_Method}{?insn, ?meth},\\
+    \tab \rel{FirstPredOfInsnInMethod}{?meth, ?pred, ?insn},\\
+    \tab \rel{!LastPredOfInsnInMethod}{?meth, ?pred, ?insn}.\\
+
+    \rel{LastOfMultiplePredsOfInsnInMethod}{?pred, ?insn, ?meth} \rulearrow\\
+    \tab \rel{Instruction\_Method}{?insn, ?meth},\\
+    \tab \rel{!FirstPredOfInsnInMethod}{?meth, ?pred, ?insn},\\
+    \tab \rel{LastPredOfInsnInMethod}{?meth, ?pred, ?insn}.
+  \end{tabular}
+  \captionof{figure}{First and last of multiple predecessors wrappers}
+  \label{fig:pred-wrappers}
+\end{figure}
+
+The negation of LastPredOfInsnInMethod in the first rule is required so that
+the FirstOfMultiplePredsOfInsnInMethod relation considers instructions
+with multiple predecessors.\\
+Otherwise it would be equivalent to the
+SinglePredOfInsnInMethod relation, whilst the same also holds for the
+LastOfMultiplePredsOfInsnInMethod. Having introduced the first and last
+predecessors rules for either case, there is the need of introducing the
+rules of the relations associated with yielding an ordering of each
+distinct predecessor. Datalog does not come with any explicit iteration syntax,
+thus we need to come with a way to enumerate those possible predecessors in a
+recursive style. We present the steps towards the multiple predecessors enumeration
+in figure \ref{fig:pred-ordering}.
+
+\begin{figure}[th]
+  \begin{tabular}{l}
+    \rel{NotNextPredOfInsnInMethod}{?meth, ?prev, ?next, ?insn} \rulearrow\\
+    \tab \rel{Instruction\_Method}{?insn, ?meth},\\
+    \tab \rel{MayPredecessorModuloThrow}{?prev, ?insn},\\
+    \tab \rel{MayPredecessorModuloThrow}{?next, ?insn},\\
+    \tab \rel{MayPredecessorModuloThrow}{?nextPossible, ?insn},\\
+    \tab \rel{ord}{?prev} < \rel{ord}{?next},\\
+    \tab \rel{ord}{?prev} < \rel{ord}{?nextPossible},\\
+    \tab \rel{ord}{?nextPossible} < \rel{ord}{?next}.\\\\
+
+    \rel{NextPredOfInsnInMethod}{?meth, ?prev, ?next, ?insn} \rulearrow\\
+    \tab \rel{Instruction\_Method}{?insn, ?meth},\\
+    \tab \rel{MayPredecessorModuloThrow}{?prev, ?insn},\\
+    \tab \rel{MayPredecessorModuloThrow}{?next, ?insn},\\
+    \tab \rel{ord}{?prev} < \rel{ord}{?next},\\
+    \tab \rel{!NotNextPredOfInsnInMethod}{?meth, ?prev, ?next, ?insn}.\\\\
+
+    \rel{NextOfMultiplePredsOfInsnInMethod}{?next, ?prev, ?insn, ?meth} \rulearrow\\
+    \tab \rel{Instruction\_Method}{?insn, ?meth},\\
+    \tab \rel{!LastPredOfInsnInMethod}{?meth, ?prev, ?insn},\\
+    \tab \rel{NextPredOfInsnInMethod}{?meth, ?prev, ?next, ?insn}.
+
+  \end{tabular}
+  \captionof{figure}{Predecessors ordering rules}
+  \label{fig:pred-ordering}
+\end{figure}
+
+The last rule in figure \ref{fig:pred-ordering} is yet again a wrapper which is used
+for the predecessors enumeration. It populates the associated relation excluding the
+last predecessor. Even though there are many different ways to tackle this problem, we
+decided to provide an interim relation which when negated yields the next predecessor
+in the enumeration. The rule feeding that relation, named NotNextPredOfInsnInMethod, considers
+the previous and next possible predecessor of an instruction and asserts that in case there is
+another one between them the rule shall fail. Thus, the negation of this relation yields the
+actual next possible predecessors which are then used to proceed with the enumeration. Lastly,
+after introducing the part responsible for the predecessors enumeration,
+we may proceed to the main algorithm that creates the path predicates at every single program
+point.
+
 
 
 % TODO: Path expressions based on the example program
