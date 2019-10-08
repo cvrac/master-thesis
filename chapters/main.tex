@@ -68,7 +68,7 @@ two. Such differentiations have extensively been made during the development of 
 in many cases will be omitted in the context of this text.
 Lastly, the \_DummyIfVar relation has been introduced in order to encode the conditional
 expressions at a given branch instruction, that is quite necessary to our implementation
-and its need is evoked due to the IR provide by Soot. It is also worth mentioning that
+and its need is evoked due to the IR provided by Soot. It is also worth mentioning that
 the facts and the associated relations as described above are provided by the generators
 written in Java. Mere preprocessing takes place before importing the final facts into \doop{}'s
 knowledge base in order to follow its conventions. That preprocessing leads to the following
@@ -149,7 +149,7 @@ approach work in figure \ref{fig:main-relations}.
 \end{figure}
 
 Those relations and their associated rules are going to be thoroughly described in the
-following section where we will be introducing the main parts of \emph{declarative symbolic reasonig}.
+following section where we will be introducing the main parts of \emph{declarative symbolic reasoning}.
 \emph{ResolveExpr} is the main relation that constructs the program's expressions that yield
 from the input statements and expressions, whilst the \emph{PathExpression*} relations are responsible
 for the construction of the control flow expressions, that is essentially encoding the
@@ -322,7 +322,7 @@ cases of (a) local variable assignments, (b) unary assignments,
 
 For simplicity, several details have been omitted from the rules as defined in
 figure \ref{fig:bin-ass-if-cond} and they have been hidden under the \emph{FUNCTION} relation.
-This function relation is demonstration purposed only and it is responsible to emit
+This function relation is for demonstration purpose only and it is responsible to emit
 the appropriate variables and generate their corresponding expressions in either
 case of binary expression assignment or if conditions for the rules to work.
 It essentially attempts to generate the appropriate combination of operands
@@ -332,7 +332,7 @@ and expressions based on whether an operand is a constant or a variable.
 
 As previously mentioned, the rules presented in this section constitute
 one of the most fundamental parts of our reasoner. They construct the
-most primitive, yet essential expressions of the anlyzed program. However,
+most primitive, yet essential expressions of the analyzed program. However,
 the expressions are guarded in a sense that if unrolled, they would all
 lead to complex expressions between symbolic expressions. We shall mention
 here that any reasoning is purely symbolic, and thus there is not any concrete
@@ -340,9 +340,9 @@ evaluation of the expressions in the sense of constant folding. One could also
 notice that even though the lack of boolean expressions up to this point. That
 is due to the SSA IR upon which any reasoning happens. The various branches,
 however complex they are are split into multiple simplified ones and thus we
-have to kee track of these. In the following section we provide an overview of
+have to keep track of these. In the following section we provide an overview of
 the algorithm responsible for generating those boolean expressions that encode
-the control flow construcs of the methods of the input program.
+the control flow constructs of the methods of the input program.
 
 \section{Path Expressions}
 
@@ -352,7 +352,7 @@ such as boolean expressions. In our case though, we need to have an exact
 representation of those high level control flow constructs in order to be
 able to reason about a program and answer several useful questions about
 it. In order to further facilitate and enhance our core symbolic reasoning
-technique we have introduced several algoritms that are responsible for the
+technique we have introduced several algorithms that are responsible for the
 reconstruction of those expressions, that namely represent the program's branch
 conditions or complete path predicates.
 
@@ -362,19 +362,19 @@ Even though the analyzed program is quite simplified and the various complex
 control flow structures have been lowered to way simpler forms, the reconstruction
 of the desired predicates is not trivial at all. Complex expressions between operands
 that contain operators such as $\&\&$, $||$ and $!$ have been simplified
-to three-address code (TAC) that completely trim those operators in favour of
+to three-address code (TAC) that completely trim those operators in favor of
 if statements with simplified boolean conditions. Even though we could modify
 the code transformer that lowers the initial program in a way that would avoid those
 transformations, we decided to preserve any external framework functionality as
 it is, implementing any predicate reformation in pure Datalog. Following
-we introduce the algorithm that implements the desired funcionality in two parts.
-For the shake of pure logic formality we consider $\land$, $\lor$ and $\neg$ the equivalents of
+we introduce the algorithm that implements the desired functionality in two parts.
+For the sake of pure logic formality we consider $\land$, $\lor$ and $\neg$ the equivalents of
 \emph{and}, \emph{or} and \emph{negation} operators.
 
 At first we provide a high level overview of the algorithms responsible
 for the restoration of the boolean predicates. The basis of each predicate is
-the first boolean expression met in the program, that is usual the first
-branch instrucion. The algorithm keeps track of the path predicates at any
+the first boolean expression met in the program, that is usually the first
+branch instruction. The algorithm keeps track of the path predicates at any
 program point before and after each instruction. Each branch instruction splits
 two distinct path predicates, whilst any other instruction does not produce
 any new path predicate but rather emits the predicate that holds at the program
@@ -384,7 +384,7 @@ up to the program point before it. The decision to consider only a single predec
 would lead to inaccurate results as several program paths would have been lost. In
 order for our algorithm to yield sound path predicates we join the
 expressions that hold after each predecessor at the program point before such an
-instruction. Recall that any reasoning is symbolic and there is not any cocrete
+instruction. Recall that any reasoning is symbolic and there is not any concrete
 evaluation, thus we can not be sure of what path predicates should be discarded.
 This brief introduction reveals that our algorithm needs to implement
 the following two functionalities: (a) the enumeration of all possible predecessors
@@ -450,7 +450,7 @@ the rules of FirstPredOfInsnInMethod and LastPredOfInsnInMethod relations. In th
 two presented in figures \ref{fig:first-pred} and \ref{fig:last-pred} we leverage
 \doop{}'s control-flow graph (CFG) analysis by using the
 MayPredecessorModuloThrow relation that provides us with the predecessors of an
-instrucion. We further aggregate with the help of min and max aggregation functions
+instruction. We further aggregate with the help of min and max aggregation functions
 of Souffle in order to distinguish the first and last predecessors of an instruction
 accordingly. Those rules are also utilized during the enumeration of the multiple
 predecessors of a single instruction, but they are wrapped into complex rules that
@@ -555,7 +555,7 @@ PathExpressionAfterFalse relations.
   \label{fig:path-after}
 \end{figure}
 
-The path expression predicates are split into two dsjoint sets of \emph{true} and \emph{false}
+The path expression predicates are split into two disjoint sets of \emph{true} and \emph{false}
 conjuncts due to the separation of a program path after a branch instruction. A branch
 instruction leads to different execution paths based on whether the condition succeeds or not.
 In order to differentiate between the two, we have introduced the
@@ -813,7 +813,7 @@ The formal definition of a logical inference rule that takes only two premises i
 where P and Q are metavariables which are essentially logical sentences that may consist
 of multiple logical statements.\\
 
-An equivalent definition of the equation \ref{eq:inference-rule}, also known as the
+An equivalent definition of the equation \ref{eq:inference-rule}, also known as
 \emph{modus ponens} is:
 
 \begin{equation}
