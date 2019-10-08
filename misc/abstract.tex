@@ -2,7 +2,29 @@
 %TODO: add abstracts
 
 \abstractEn{
-abstract english
+In an era of an ever-increasing use of software technologies
+for almost any everyday task, the requirement for high quality and flawless software is highly
+indispensable. To that end, several tools leveraging program analysis techniques have been
+introduced in the literature, mainly aiming to assist developers in performance optimization or bug finding.
+
+Those tools may either be highly autonomous or possibly rely on external frameworks to back their reasoning.
+A symbolic execution tool stands as an example that is highly dependent to an
+external constraint solver, else known as theorem prover, that aids it by inducing a solution to an input
+constraint formula which further directs the execution. Those tools essentially try to yield proofs, yet they
+are implemented as complex software systems in a common programming language, not being easily extensible.
+Declarative programming languages are increasingly becoming more preferable over the last few years by
+the Computer Science community, with applications that span from program analysis to databases and distributed
+systems. The main power of declarative languages is that the developer needs to focus on what, rather than
+how he wants to achieve anything.
+
+Motivated by the success of theorem provers as aiding tools in symbolic execution and the convenience
+that declarative programming languages provide, in this thesis we attempt to introduce a strictly
+declarative implementation of a theorem prover in Datalog. Our approach, namely static
+declarative symbolic reasoning is implemented within the \doop{} framework for
+Java Pointer Analysis, and it mainly seeks to answer \emph{"Which expressions are implied by another
+expression within a program"}. The main motivation behind that decision was to leverage \doop{}'s
+powerful infrastructure, and at the same time make it possible for \doop{} to utilize the reasoner
+in the future for any of its analyses.
 }
 
 
