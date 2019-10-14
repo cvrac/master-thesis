@@ -666,9 +666,9 @@ publications}\gdef\@lopfileinternal{#1}}
 
 
     % \addcontentsline{toc}{chapter}{\listalgorithmname}
-    \listofalgorithms
-    \thispagestyle{empty}
-    \cleardoublepage
+    % \listofalgorithms
+    % \thispagestyle{empty}
+    % \cleardoublepage
 
 
     % list of listings

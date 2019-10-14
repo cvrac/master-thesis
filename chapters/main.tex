@@ -7,6 +7,58 @@ bunch of Souffle Datalog rules, along with the related input facts.
 postprocessing pieces that can be leveraged to enhance the core of
 our reasoning at relatively swift speed.
 
+\begin{figure}[th]
+  \begin{minipage}{.5\textwidth}
+\begin{lstlisting}[language = Java , firstnumber = last , escapeinside={(*@}{@*)}, escapechar=\%]
+%
+%
+%
+%
+%
+%
+%
+%
+%
+%
+boolean and(boolean t, boolean f) {
+  boolean x = t && f;
+  return x;
+}
+%
+%
+%
+%
+%
+%
+%
+%
+
+\end{lstlisting}
+\captionof{lstlisting}{Java source code}
+\label{sc:java-code}
+\end{minipage}\hfill
+\begin{minipage}{.5\textwidth}
+\begin{lstlisting}[language = Java , firstnumber = last , escapeinside={(*@}{@*)}]
+boolean and(boolean t, boolean f) {
+  boolean y, x, z;
+
+  if t == 0 goto label1;
+  if f == 0 goto label1;
+  x = 1;
+  goto label2;
+label1:
+  y = 0;
+label2:
+  z = phi(x, y);
+  return z;
+}
+\end{lstlisting}
+\captionof{lstlisting}{Soot Jimple code}
+\label{sc:soot-code}
+\end{minipage}
+\end{figure}
+
+
 \section{Schema Relations and Types}
 
 \subsection{Input Facts and Types}
@@ -183,29 +235,33 @@ input expressions are presented in the following figures.
 
 \begin{figure}[h]
 \begin{minipage}{.5\textwidth}
+  \begin{tabular}{l}
   \rel{ResolveExpr}{?meth, ?var, ?expr} \rulearrow\\
-  \rel{isAssignLocal\_Insn}{?insn},\\
-  \rel{AssignLocal\_From}{?insn, ?param},\\
-  \rel{FormalParam}{\_, ?meth, ?param},\\
-  \rel{Var\_Type}{?param, ?type},\\
-  \rel{}{\rel{isPrimitiveType}{?type} ;\\
-         \rel{isReferenceType}{?type}},\\
-  \rel{AssignInstruction\_To}{?insn, ?var},\\
-  \rel{Instruction\_Method}{?insn, ?meth},\\
-  \record{?expr}\singlefieldbrackets{?param, ?type, nil, nil}.
+  \tab \rel{isAssignLocal\_Insn}{?insn},\\
+  \tab \rel{AssignLocal\_From}{?insn, ?param},\\
+  \tab \rel{FormalParam}{\_, ?meth, ?param},\\
+  \tab \rel{Var\_Type}{?param, ?type},\\
+  \tab (\rel{isPrimitiveType}{?type} ;\\
+  \tab \rel{isReferenceType}{?type}),\\
+  \tab \rel{AssignInstruction\_To}{?insn, ?var},\\
+  \tab \rel{Instruction\_Method}{?insn, ?meth},\\
+  \tab \record{?expr}\singlefieldbrackets{?param, ?type, nil, nil}.
+\end{tabular}
   \captionof{figure}{(a) method parameter}
   \label{fig:params-a}
 \end{minipage}%
 \begin{minipage}{.5\textwidth}
+  \begin{tabular}{l}
   \rel{ResolveExpr}{?meth, ?var, ?expr} \rulearrow\\
-  \rel{isMethodInvocation}{?insn},\\
-  \rel{MethodInvocation\_Method}{?insn, ?sig},\\
-  \rel{Method\_ReturnType}{?sig, \_, ?type},\\
-  \rel{}{\rel{isPrimitiveType}{?type} ;\\
-      \rel{isReferenceType}{?type}},\\
-  \rel{Instruction\_Method}{?insn, ?meth},\\
-  \rel{AssignReturnValue}{?insn, ?var},\\
-  \record{?expr}\singlefieldbrackets{?param, ?type, nil, nil}.\\
+  \tab \rel{isMethodInvocation}{?insn},\\
+  \tab \rel{MethodInvocation\_Method}{?insn, ?sig},\\
+  \tab \rel{Method\_ReturnType}{?sig, \_, ?type},\\
+  \tab (\rel{isPrimitiveType}{?type} ;\\
+  \tab \rel{isReferenceType}{?type}),\\
+  \tab \rel{Instruction\_Method}{?insn, ?meth},\\
+  \tab \rel{AssignReturnValue}{?insn, ?var},\\
+  \tab \record{?expr}\singlefieldbrackets{?param, ?type, nil, nil}.\\\\
+\end{tabular}
   \captionof{figure}{(b) method invocation results}
   \label{f:result-b}
 \end{minipage}
@@ -213,24 +269,28 @@ input expressions are presented in the following figures.
 
 \begin{figure}[th]
   \begin{minipage}{.5\textwidth}
+    \begin{tabular}{l}
     \rel{ResolveExpr}{?meth, ?var, ?expr} \rulearrow\\
-    \rel{isLoadInstanceField\_Insn}{?insn},\\
-    \rel{LoadInstanceField\_To}{?insn, ?var},\\
-    \rel{Var\_Type}{?var, ?type},\\
-    \rel{}{\rel{isPrimitiveType}{?type} ;\\ \rel{isReferenceType}{?type}},\\
-    \rel{Instruction\_Method}{?insn, ?meth},\\
-    \record{?expr}\singlefieldbrackets{?var, ?type, nil, nil}.\\
+    \tab \rel{isLoadInstanceField\_Insn}{?insn},\\
+\tab    \rel{LoadInstanceField\_To}{?insn, ?var},\\
+\tab    \rel{Var\_Type}{?var, ?type},\\
+\tab    (\rel{isPrimitiveType}{?type} ;\\ \tab \rel{isReferenceType}{?type}),\\
+\tab    \rel{Instruction\_Method}{?insn, ?meth},\\
+\tab    \record{?expr}\singlefieldbrackets{?var, ?type, nil, nil}.\\
+\end{tabular}
     \captionof{figure}{(c) load instance fields}
     \label{fig:field-c}
   \end{minipage}
   \begin{minipage}{.5\textwidth}
-    \rel{ResolveExpr}{?meth, ?var, ?expr} \rulearrow\\
-    \rel{isLoadInstanceField\_Insn}{?insn},\\
-    \rel{LoadInstanceField\_To}{?insn, ?var},\\
-    \rel{Var\_Type}{?var, ?type},\\
-    \rel{}{\rel{isPrimitiveType}{?type} ;\\ \rel{isReferenceType}{?type}},\\
-    \rel{Instruction\_Method}{?insn, ?meth},\\
-    \record{?expr}\singlefieldbrackets{?var, ?type, nil, nil}.\\
+    \begin{tabular}{l}
+\rel{ResolveExpr}{?meth, ?var, ?expr} \rulearrow\\
+\tab    \rel{isLoadInstanceField\_Insn}{?insn},\\
+\tab    \rel{LoadInstanceField\_To}{?insn, ?var},\\
+\tab    \rel{Var\_Type}{?var, ?type},\\
+\tab    (\rel{isPrimitiveType}{?type} ;\\ \tab \rel{isReferenceType}{?type}),\\
+\tab    \rel{Instruction\_Method}{?insn, ?meth},\\
+\tab    \record{?expr}\singlefieldbrackets{?var, ?type, nil, nil}.\\
+  \end{tabular}
     \captionof{figure}{(d) load static fields}
     \label{fig:field-d}
   \end{minipage}
@@ -238,28 +298,32 @@ input expressions are presented in the following figures.
 
 \begin{figure}[th]
   \begin{minipage}{.5\textwidth}
-    \rel{ResolveExpr}{?meth, ?var, ?expr} \rulearrow\\
-    \rel{isAssignNumConstant\_Insn}{?insn},\\
-    \rel{AssignInstruction\_To}{?insn, ?var},\\
-    \rel{Var\_Type}{?var, ?type},\\
-    \rel{}{\rel{isPrimitiveType}{?type} ;\\
-      \rel{isReferenceType}{?type}},\\
-    \rel{Instruction\_Method}{?insn, ?meth},\\
-    \rel{AssignNumConstant\_Id}{?insn, ?const},\\
-    \record{?expr}\singlefieldbrackets{?const, ?type, nil, nil}.
+    \begin{tabular}{l}
+\rel{ResolveExpr}{?meth, ?var, ?expr} \rulearrow\\
+\tab    \rel{isAssignNumConstant\_Insn}{?insn},\\
+\tab    \rel{AssignInstruction\_To}{?insn, ?var},\\
+\tab    \rel{Var\_Type}{?var, ?type},\\
+\tab    (\rel{isPrimitiveType}{?type} ;\\
+\tab      \rel{isReferenceType}{?type}),\\
+\tab    \rel{Instruction\_Method}{?insn, ?meth},\\
+\tab    \rel{AssignNumConstant\_Id}{?insn, ?const},\\
+\tab    \record{?expr}\singlefieldbrackets{?const, ?type, nil, nil}.
+  \end{tabular}
   \captionof{figure}{(e) numeric assignments}
   \label{fig:ass-num}
   \end{minipage}
   \begin{minipage}{.5\textwidth}
-    \rel{ResolveExpr}{?meth, ?var, ?expr} \rulearrow\\
-    \rel{Instruction\_Method}{?insn, ?meth}\\
-    \rel{isAssignLocal\_Insn}{?insn},\\
-    \rel{AssignInstruction\_To}{?insn, ?var},\\
-    \rel{Var\_Type}{?var, ?type},\\
-    \rel{}{\rel{isPrimitiveType}{?type} ;\\
-      \rel{isReferenceType}{?type}},\\
-    \record{c}\singlefield{count: \rel{AssignInstruction\_To}{\_, ?var}},\\
-    \recordname{c}\singlefield{ > 1}, \record{?expr}\singlefieldbrackets{?var, ?type, nil, nil}.
+    \begin{tabular}{l}
+\rel{ResolveExpr}{?meth, ?var, ?expr} \rulearrow\\
+\tab    \rel{Instruction\_Method}{?insn, ?meth}\\
+\tab    \rel{isAssignLocal\_Insn}{?insn},\\
+\tab    \rel{AssignInstruction\_To}{?insn, ?var},\\
+\tab    \rel{Var\_Type}{?var, ?type},\\
+\tab    (\rel{isPrimitiveType}{?type} ;\\
+\tab      \rel{isReferenceType}{?type}),\\
+\tab    \record{c}\singlefield{count: \rel{AssignInstruction\_To}{\_, ?var}},\\
+\tab    \recordname{c}\singlefield{ > 1}, \record{?expr}\singlefieldbrackets{?var, ?type, nil, nil}.
+\end{tabular}
   \captionof{figure}{(f) phi assignments}
   \label{fig:phi-ass}
   \end{minipage}
@@ -273,48 +337,56 @@ cases of (a) local variable assignments, (b) unary assignments,
 
 \begin{figure}[th]
   \begin{minipage}{.54\textwidth}
+    \begin{tabular}{l}
     \rel{ResolveExpr}{?meth, ?var, ?expr} \rulearrow\\
-    \rel{Instruction\_Method}{?insn, ?meth}\\
-    \rel{isAssignLocal\_Insn}{?insn},\\
-    \rel{AssignInstruction\_To}{?insn, ?var},\\
-    \rel{Var\_Type}{?var, ?type},\\
-    \rel{}{\rel{isPrimitiveType}{?type} ;\\
-      \rel{isReferenceType}{?type}},\\
-    \record{c}\singlefield{count: \rel{AssignInstruction\_To}{\_, ?var}},\\
-    \recordname{c}\singlefield{ = 1}, \rel{AssicnLocal\_From}{?insn, ?from},\\
-    \rel{ResolveExpr}{?meth, ?from, ?expr}.\\
+\tab    \rel{Instruction\_Method}{?insn, ?meth}\\
+\tab    \rel{isAssignLocal\_Insn}{?insn},\\
+\tab    \rel{AssignInstruction\_To}{?insn, ?var},\\
+\tab    \rel{Var\_Type}{?var, ?type},\\
+\tab    (\rel{isPrimitiveType}{?type} ;\\
+\tab      \rel{isReferenceType}{?type}),\\
+\tab    \record{c}\singlefield{count: \rel{AssignInstruction\_To}{\_, ?var}},\\
+\tab    \recordname{c}\singlefield{ = 1}, \rel{AssicnLocal\_From}{?insn, ?from},\\
+\tab \rel{ResolveExpr}{?meth, ?from, ?expr}.\\
+  \end{tabular}
   \end{minipage}
   \begin{minipage}{.46\textwidth}
+    \begin{tabular}{l}
     \rel{ResolveExpr}{?meth, ?var, ?expr} \rulearrow\\
-    \rel{isAssignUnop\_Insn}{?insn},\\
-    \rel{AssignInstruction\_To}{?insn, ?var},\\
-    \rel{Var\_Type}{?var, ?type},\\
-    \rel{}{\rel{isPrimitiveType}{?type} ;\\
-      \rel{isReferenceType}{?type}},\\
-    \rel{Instruction\_Method}{?insn, ?meth},\\
-    \rel{AssignOper\_From}{?insn, \_, ?right},\\
-    \rel{\_OperatorAt}{?insn, ?op},\\
-    \rel{ResolveExpr}{?meth, ?right, ?rExpr},\\
-    \record{?expr}\singlefieldbrackets{?op, ?type, ?rExpr, nil}.
+\tab    \rel{isAssignUnop\_Insn}{?insn},\\
+\tab    \rel{AssignInstruction\_To}{?insn, ?var},\\
+\tab    \rel{Var\_Type}{?var, ?type},\\
+\tab    \rel{isPrimitiveType}{?type} ;\\
+\tab      \rel{isReferenceType}{?type}),\\
+\tab    \rel{Instruction\_Method}{?insn, ?meth},\\
+\tab    \rel{AssignOper\_From}{?insn, \_, ?right},\\
+\tab    \rel{\_OperatorAt}{?insn, ?op},\\
+\tab    \rel{ResolveExpr}{?meth, ?right, ?rExpr},\\
+\tab    \record{?expr}\singlefieldbrackets{?op, ?type, ?rExpr, nil}.
+  \end{tabular}
   \end{minipage}
   \captionof{figure}{(a) local variable and (b) unary assignments}
   \label{fig:local-unary-ass}
-  \begin{minipage}{.55\textwidth}
+  \begin{minipage}{.50\textwidth}
+    \begin{tabular}{l}
     \rel{ResolveExpr}{?meth, ?var, ?expr} \rulearrow\\
-    \rel{FUNCTION}{?var, ?right1, ?right2, ?op},\\
-    \rel{Var\_Type}{?var, ?type},\\
-    \rel{}{\rel{isPrimitiveType}{?type} ;\\
-      \rel{isReferenceType}{?type}},\\
-    \rel{ResolveExpr}{?meth, ?right1, ?lExpr},\\
-    \rel{ResolveExpr}{?meth, ?right2, ?rExpr},\\
-    \record{?expr}\singlefieldbrackets{?op, ?type, ?lExpr, ?rExpr}.
+\tab    \rel{FUNCTION}{?var, ?right1, ?right2, ?op},\\
+\tab    \rel{Var\_Type}{?var, ?type},\\
+\tab    (\rel{isPrimitiveType}{?type} ;\\
+\tab      \rel{isReferenceType}{?type}),\\
+\tab    \rel{ResolveExpr}{?meth, ?right1, ?lExpr},\\
+\tab    \rel{ResolveExpr}{?meth, ?right2, ?rExpr},\\
+\tab    \record{?expr}\singlefieldbrackets{?op, ?type, ?lExpr, ?rExpr}.
+  \end{tabular}
   \end{minipage}
-  \begin{minipage}{.46\textwidth}
+  \begin{minipage}{.50\textwidth}
+    \begin{tabular}{l}
     \rel{ResolveExpr}{?meth, ?var, ?expr} \rulearrow\\
-    \rel{FUNCTION}{?var, ?right1, ?right2, ?op},\\
-    \rel{ResolveExpr}{?meth, ?right1, ?lExpr},\\
-    \rel{ResolveExpr}{?meth, ?right2, ?rExpr},\\
-    \record{?expr}\singlefieldbrackets{?op, "boolean", ?lExpr, ?rExpr}.
+\tab    \rel{FUNCTION}{?var, ?right1, ?right2, ?op},\\
+\tab    \rel{ResolveExpr}{?meth, ?right1, ?lExpr},\\
+\tab    \rel{ResolveExpr}{?meth, ?right2, ?rExpr},\\
+\tab    \record{?expr}\singlefieldbrackets{?op, "boolean", ?lExpr, ?rExpr}.
+  \end{tabular}
   \end{minipage}
   \captionof{figure}{(c) binary assignments and (d) if conditions}
   \label{fig:bin-ass-if-cond}

@@ -152,3 +152,38 @@
 \newcommand{\gobblenextarg}[1]{
 \texttt{\textcolor{NavyBlue}{,}}\\ \texttt{\textcolor{Bittersweet}{\small{#1}}}
 \@ifnextchar\bgroup{\gobblenextarg}{ \\ \texttt{\textcolor{NavyBlue}{]}}\\ }}
+
+\newcommand{\code}[1]{\texttt{#1}}
+
+\setminted[java]{style=friendly}
+
+\newminted[javacode]{java}{%
+    % mathescape,
+    % autogobble,
+    tabsize=4,
+    fontsize=\footnotesize,
+    xleftmargin=30pt,
+    linenos
+}
+
+\newminted[javacodeNoLines]{java}{%
+    % mathescape,
+    % autogobble,
+    tabsize=4,
+    fontsize=\footnotesize,
+    xleftmargin=15pt
+}
+
+\usepackage{courier} %% Sets font for listing as Courier.
+\usepackage{listings, xcolor}
+\lstset{
+tabsize = 4, %% set tab space width
+showstringspaces = false, %% prevent space marking in strings, string is defined as the text that is generally printed directly to the console
+commentstyle = \color{green}, %% set comment color
+keywordstyle = \color{blue}, %% set keyword color
+stringstyle = \color{red}, %% set string color
+rulecolor = \color{black}, %% set frame color to avoid being affected by text color
+basicstyle = \small \ttfamily , %% set listing font and size
+breaklines = true, %% enable line breaking
+numberstyle = \tiny,
+}

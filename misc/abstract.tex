@@ -2,21 +2,6 @@
 %TODO: add abstracts
 
 \abstractEn{
-In an era of an ever-increasing use of software technologies
-for almost any everyday task, the requirement for high quality and flawless software is highly
-indispensable. To that end, several tools leveraging program analysis techniques have been
-introduced in the literature, mainly aiming to assist developers in performance optimization or bug finding.
-
-Those tools may either be highly autonomous or possibly rely on external frameworks to back their reasoning.
-A symbolic execution tool stands as an example that is highly dependent to an
-external constraint solver, else known as theorem prover, that aids it by inducing a solution to an input
-constraint formula which further directs the execution. Those tools essentially try to yield proofs, yet they
-are implemented as complex software systems in a common programming language, not being easily extensible.
-Declarative programming languages are increasingly becoming more preferable over the last few years by
-the Computer Science community, with applications that span from program analysis to databases and distributed
-systems. The main power of declarative languages is that the developer needs to focus on what, rather than
-how he wants to achieve anything.
-
 Motivated by the success of theorem provers as aiding tools in symbolic execution and the convenience
 that declarative programming languages provide, in this thesis we attempt to introduce a strictly
 declarative implementation of a theorem prover in Datalog. Our approach, namely static
@@ -27,8 +12,15 @@ powerful infrastructure, and at the same time make it possible for \doop{} to ut
 in the future for any of its analyses.
 }
 
-
-
 \abstractGr{
-abstract greek
+Έχοντας ως κίνητρο την επιτυχία των προγραμμάτων απόδειξης θεωρημάτων ως υποστηρικτικά
+εργαλεία στην συμβολική εκτέλεση και την ευκολία που παρέχουν οι δηλωτικές γλώσσες
+προγραμματισμού, στην εργασία αυτή επιχειρούμε να εισάγουμε μια αυστηρώς δηλωτική
+υλοποίηση ενός προγράμματος απόδειξης θεωρημάτων σε Datalog. Η προσέγγισή μας,
+πιο συγκεκριμένα η στατικά δηλωτική συμβολική συλλογιστική, υλοποιήθηκε στα πλαίσια του
+εργαλείου \doop{} για Ανάλυση Δεικτών σε προγράμματα Java, και κυρίως επιδιώκει να
+δώσει απάντηση στο \emph{"Ποιες είναι οι εκφράσεις οι οποίες συνεπάγονται από άλλες
+εκφράσεις εντός ενός προγράμματος"}. Το κύριο κίνητρο πίσω από αυτήν την απόφαση ήταν
+η αξιοποίηση των ισχυρών δομών του \doop{} και ταυτόχρονα η παροχή της
+δυνατότητας μελλοντικής χρησιμοποίησης του εργαλείου συλλογιστικής στο μέλλον.
 }
