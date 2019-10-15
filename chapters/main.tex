@@ -1,11 +1,13 @@
 \chapter{Static Declarative Symbolic Reasoning}\label{c:main-content}
 
 In this chapter we present our approach towards static declarative
-symbolic reasoning. The main core of the reasoning is encoded as a
-bunch of Souffle Datalog rules, along with the related input facts.
-\doop{} includes a whole of preprocessing, expressive analyses and
-postprocessing pieces that can be leveraged to enhance the core of
-our reasoning at relatively swift speed.
+symbolic reasoning. The core of the reasoning is encoded as a
+set of Souffle Datalog rules, along with the related input facts.
+\doop{} includes several preprocessing steps, expressive analyses and
+postprocessing parts that can be leveraged to enhance the core of
+our reasoning at relatively swift speed. The motivating Java example
+along with the associated Jimple code (Soot's IR) are presented in
+\ref{sc:java-code} and \ref{sc:soot-code} respectively.
 
 \begin{figure}[th]
   \begin{minipage}{.5\textwidth}
@@ -67,8 +69,8 @@ label2:
 extensive set of input facts that may be leveraged for our reasoning.
 Those generators either target different input languages or different
 intermediate representations (IR). As an example, there are generators
-that target the Java language, Android technology or Python. Those
-generators may further utilize different tools that would take care
+that target the Java language, Android technology or Python. These
+generators may further utilize different tools that would take care of
 the translation of the input program into the corresponding IR; the
 current tools being used by \doop{} are namely Soot and WALA. In the case of
 Java, the generators ought to produce the same set of input facts
@@ -78,20 +80,21 @@ produced by the generators. The existing set of generated
 facts is quite extensive and it is constantly further enriched, yet it
 does not provide us with a set of facts crucial for the reasoning
 we introduce. Hosting a rich whole of various pointer analyses,
-\doop{} mainly needs knowledge that is related to pointers, or
-in the Java setting reference types. As such, \doop{} lacks
+\doop{} mainly needs knowledge that is related to pointers, or,
+in the Java setting, reference types. As such, \doop{} lacks
 presence of multiple facts in regard to primitive types or
-values and in the case that they exist they are relatively
-non-adequate. In that notion we decided to modify the common fact
+values and in case that they exist they are relatively
+inadequate. Towards this end we decided to modify the common fact
 generator in a way that enhances \doop{} with facts to be consumed
-by our symbolic reasoning approach, or modifies several existing ones.
-At the same time those facts may also come handy for \doop{} itself
+by our symbolic reasoning approach.
+At the same time these facts may also come handy for \doop{} itself
 in the future. In order to be able to construct a fine-grained
 analysis we modified a certain amount of facts as follows in figure \ref{fig:facts-modified}.
 
 \begin{figure}[th]
-\rel{\_AssignOperFrom}{instruction, position, from}.\\
-\rel{\_IfVar}{instruction, position, var}.
+  \centering
+\rel{\_AssignOperFrom}{insn, position, from}.\\
+\rel{\_IfVar}{insn, position, var}.
 \captionof{figure}{Modified \doop{} facts}
 \label{fig:facts-modified}
 \end{figure}
@@ -102,82 +105,85 @@ the same also holds for \_IfVar too. Next, we provide a glimpse of all the
 newly introduced generated facts in figure \ref{fig:facts-new}.
 
 \begin{figure}[th]
-  \rel{\_OperatorAt}{instruction, operator}.\\
-  \rel{\_DummyIfVar}{instruction, var}.\\
-  \rel{\_AssignOperFromConstant}{instruction, position, from}.\\
-  \rel{\_IfConstant}{instruction, position, constant}.
+  \begin{minipage}{.51\textwidth}
+  \rel{\_OperatorAt}{insn, operator}.\\
+  \rel{\_DummyIfVar}{insn, var}.\\
+  \rel{\_AssignOperFromConstant}{insn, position, from}.\\
+  \rel{\_IfConstant}{insn, position, constant}.\\\\
   \captionof{figure}{New \doop{} facts}
   \label{fig:facts-new}
+\end{minipage}
+\begin{minipage}{.59\textwidth}
+  \rel{AssignOper\_From}{insn, position, from}.\\
+  \rel{AssignOper\_FromConstant}{insn, position, from}.\\
+  \rel{If\_Var}{insn, position, var}.\\
+  \rel{If\_Constant}{insn, position, constant}.\\
+  \rel{DummyIf\_Var}{insn, var}.\\
+  \rel{Operator\_At}{insn, operator}.
+  \captionof{figure}{Imported facts}
+  \label{fig:imported-facts}
+\end{minipage}
+
 \end{figure}
 
-Those input facts share many similarities in regards to the associated
+These input facts share many similarities in regards to the associated
 variables - relation columns - though each one encodes crucial knowledge.
 The \_OperatorAt relation holds facts that encode the operation being present
 at a given instruction. \_AssignOperFromConstant is an alternate rule of \_AssignOperFrom,
-whilst \_IfConstant is equivalent to \_IfVar. A constant type is different to a variable type
+while \_IfConstant is analogous to \_IfVar. A constant type is different to a variable type
 in the context of the framework, thus the need for a more detailed differentiation between the
 two. Such differentiations have extensively been made during the development of our approach, but
-in many cases will be omitted in the context of this text.
+in many cases will be omitted in the context of this text. These relations essentially encode
+the operands met in a unary/binary or if-condition expression accordingly.
 Lastly, the \_DummyIfVar relation has been introduced in order to encode the conditional
 expressions at a given branch instruction, that is quite necessary to our implementation
 and its need is evoked due to the IR provided by Soot. It is also worth mentioning that
 the facts and the associated relations as described above are provided by the generators
 written in Java. Mere preprocessing takes place before importing the final facts into \doop{}'s
 knowledge base in order to follow its conventions. That preprocessing leads to the following
-renames as described in figure \ref{fig:imported-facts}.
-
-\begin{figure}[th]
-  \rel{AssignOper\_From}{instruction, position, from}.\\
-  \rel{AssignOper\_FromConstant}{instruction, position, from}.\\
-  \rel{If\_Var}{instruction, position, var}.\\
-  \rel{If\_Constant}{instruction, position, constant}.\\
-  \rel{DummyIf\_Var}{instruction, var}.\\
-  \rel{Operator\_At}{instruction, operator}.\\
-  \captionof{figure}{Imported facts}
-  \label{fig:imported-facts}
-\end{figure}
+massaged relations as described in figure \ref{fig:imported-facts}.
 
 The relations described thus far are only a small set of the input to our reasoning, as we have
-made use of the various relations and rules that were already existed in \doop{}. Here we have
-only presented the brand new input relations or the ones that we modified. However we can
-not provide an extensive presentation of all, thus we will briefly describe them in the
+made use of the various relations and rules that already existed in \doop{}. Here we have
+only presented the brand new input relations or the ones that we modified. However we cannot
+provide an extensive presentation of all, thus we will briefly describe them in the
 following sections, in the context of the rules that they are used.
-
-Our symbolic reasoning approach namely reasons about a program's possible expressions. That
-said, there is a need for the representation of a program's expression, either primitive ones
-or not. \doop{} does not include such an encoding, due to the fact that its analyses mainly
-reason about pointers. In order to address that and also lay the foundations of our approach,
-we have introduced the following types as described in figure \ref{fig:expr-type}.
 
 \begin{figure}[th]
   \type{SymbolicInput}\singlefield{Var | MethodInvocation | NumConstant}\\
   \type{Operator}\singlefield{symbol}\\
   \type{ExpressionType}\singlefield{PrimitiveType | ReferenceType}\\
   \type{Base}\singlefield{SymbolicInput | Operator}\\
-  \type{Expr}\typefields{\tab base: Base}{\tab type: ExpressionType}{\tab left: Expr}{\tab right: Expr}\\
+  \type{Expr}\typefields{\tab base: Base}{\tab type: ExpressionType}{\tab left: Expr}{\tab right: Expr}
   \captionof{figure}{Expression Type}
   \label{fig:expr-type}
 \end{figure}
 
+Our symbolic reasoning approach reasons about a program's possible expressions. That
+said, there is a need for the representation of a program's expression, whether primitive
+or not. \doop{} does not include such an encoding, due to the fact that its analyses mainly
+reason about pointers. In order to address this and also lay the foundations of our approach,
+we have introduced the appropriate types as described in figure \ref{fig:expr-type}.
+
 The types that are defined using a (\dl{|}) symbol are said to inherit from the
-associated types, whilst the latter definition introduces a new record type. The
+associated types, while the latter definition introduces a new record type. The
 expression type manages to represent both unary, binary and constant expressions at the same time,
 by distinguishing each case with the help of the \emph{base} field. If base is of type
-\emph{SymbolicInput} then the latter \emph{Expr} fields are nil, whilst in the case of
-base being of \emph{Operator} at least the first of the Expr fields is indeed an expression.
+\emph{SymbolicInput} then the latter \emph{Expr} fields are nil, while in the case of
+base being an \emph{Operator} at least the first of the Expr fields is indeed an expression.
 For each distinct expression we also preserve its type, which can either be
-\emph{PrimitiveType} or \emph{ReferenceType}. Those types are the building blocks for the
-construction of the program's expression. It may come natural to the reader that
+\emph{PrimitiveType} or \emph{ReferenceType}. These types are the building blocks for the
+construction of the program's expressions. It may come natural to the reader that
 the encoding leads to complex \emph{expression trees}. This expression type is essentially
 what powers our declarative symbolic reasoning approach, encoding both the primitive
 expressions of the input program and its control flow constructs at the same time.
 
 \subsection{Relations}
 
-We here provide a brief presentation of the \emph{main} declared relations that make our
+We provide here a brief presentation of the \emph{main} declared relations that make our
 approach work in figure \ref{fig:main-relations}.
 
-\begin{figure}[th]
+\begin{figure}[h]
   \declkeyword \tab \rel{ResolveExpr}{meth: Method, var: symbol, expr: Expr}\\
   \declkeyword \tab \rel{isExpr}{expr: Expr}\\
   \declkeyword \tab \rel{isArithmeticExpr}{expr: Expr}\\
@@ -195,20 +201,20 @@ approach work in figure \ref{fig:main-relations}.
   \declkeyword \tab \rel{ExprImpliesOther}{expr: Expr, exprOther: Expr}\\
   \declkeyword \tab \rel{ExprIsAlwaysTrue}{expr: Expr}\\
   \declkeyword \tab \rel{ExprIsAlwaysFalse}{expr: Expr}\\
-  \declkeyword \tab \rel{ExprIsNegationOfOther}{expr: Expr, exprOther: Expr}\\
+  \declkeyword \tab \rel{ExprIsNegationOfOther}{expr: Expr, exprOther: Expr}
   \captionof{figure}{Main Symbolic Reasoning relations}
   \label{fig:main-relations}
 \end{figure}
 
-Those relations and their associated rules are going to be thoroughly described in the
+These relations and their associated rules are going to be thoroughly described in the
 following section where we will be introducing the main parts of \emph{declarative symbolic reasoning}.
-\emph{ResolveExpr} is the main relation that constructs the program's expressions that yield
-from the input statements and expressions, whilst the \emph{PathExpression*} relations are responsible
-for the construction of the control flow expressions, that is essentially encoding the
-branches taken up to as specific program point. Lastly, our declarative symbolic reasoner
+\emph{ResolveExpr} is the main relation that constructs the program's expressions derived
+from the input statements and expressions, while the \emph{PathExpression*} relations are responsible
+for the construction of the control flow expressions, essentially encoding the
+branches taken up to a specific program point. Lastly, our declarative symbolic reasoner
 is powered by the rules of \emph{ExprImpliesOther}, \emph{ExprIsAlwaysTrue}, \emph{ExprIsAlwaysFalse}
 and \emph{ExprIsNegationOfOther} relations, attempting to prove \emph{implications} between the expressions
-and assert those that hold \emph{true} or \emph{false} equivalently, if possible.\\
+and assert those that hold \emph{true} or \emph{false} equivalently, if possible.
 
 \section{Program Expression Trees}\label{s:pets}
 
@@ -216,20 +222,20 @@ and assert those that hold \emph{true} or \emph{false} equivalently, if possible
 % Description of the rules related to the ResolveExpr relation, omitting some details
 
 Introducing a Souffle type that represents a program's expressions is only one
-step towards symbolic reasoning of a program. For our reasoner to be able to provide us
-with meaningful results we have to generate its world of expressions. To that end, we
+step towards symbolic reasoning over a program. For our reasoner to be able to provide us
+with meaningful results, we have to generate its world of expressions. To that end, we
 have introduced several rules that build expression trees from the given program's
-input relations which essentially encode the expressions of a program in a symbolic
-manner. The first set of those rules originate from the \emph{ResolveExpr} relation
+input relations, which essentially encode the expressions of a program in a symbolic
+manner. The first set of these rules originate from the \emph{ResolveExpr} relation
 that was declared in figure \ref{fig:main-relations} of the previous section.
 
 The ResolveExpr rules are divided into two sets of rules. The ones that encode
 the base, \emph{symbolic input} expressions and those that lead to the construction of the
-complex composite expressions. Symbolic input expressions namely represent the
+complex composite expressions. Symbolic input expressions represent the
 symbolic inputs of a method. We consider (a) method parameters, (b) method invocation
 results, (c) instance and static fields loading, (d) numeric constant assignments and
-(e) phi assignments as symbolic inputs. Those input cases form the basis of our
-expressions, and it also worts mentioning that our reasoner mainly asserts any new
+(e) phi assignments as symbolic inputs. These input cases form the basis of our
+expressions, and it is also worth mentioning that our reasoner mainly asserts any new
 knowledge in an intra-procedural fashion. The rules for the enumerated symbolic
 input expressions are presented in the following figures.
 
@@ -276,7 +282,7 @@ input expressions are presented in the following figures.
 \tab    \rel{Var\_Type}{?var, ?type},\\
 \tab    (\rel{isPrimitiveType}{?type} ;\\ \tab \rel{isReferenceType}{?type}),\\
 \tab    \rel{Instruction\_Method}{?insn, ?meth},\\
-\tab    \record{?expr}\singlefieldbrackets{?var, ?type, nil, nil}.\\
+\tab    \record{?expr}\singlefieldbrackets{?var, ?type, nil, nil}.
 \end{tabular}
     \captionof{figure}{(c) load instance fields}
     \label{fig:field-c}
@@ -289,7 +295,7 @@ input expressions are presented in the following figures.
 \tab    \rel{Var\_Type}{?var, ?type},\\
 \tab    (\rel{isPrimitiveType}{?type} ;\\ \tab \rel{isReferenceType}{?type}),\\
 \tab    \rel{Instruction\_Method}{?insn, ?meth},\\
-\tab    \record{?expr}\singlefieldbrackets{?var, ?type, nil, nil}.\\
+\tab    \record{?expr}\singlefieldbrackets{?var, ?type, nil, nil}.
   \end{tabular}
     \captionof{figure}{(d) load static fields}
     \label{fig:field-d}
@@ -331,9 +337,9 @@ input expressions are presented in the following figures.
 
 The various relations used in the rules bodies are quite self-explanatory
 which proves the expressiveness and high quality of \doop{}'s code.
-In the following figures we present the recursive rules that apply for the
+We present the recursive rules that apply for the
 cases of (a) local variable assignments, (b) unary assignments,
-(c) binary expression assignments and (d) if conditions.
+(c) binary expression assignments and (d) if conditions in the associated figures.
 
 \begin{figure}[th]
   \begin{minipage}{.54\textwidth}
@@ -394,10 +400,10 @@ cases of (a) local variable assignments, (b) unary assignments,
 
 For simplicity, several details have been omitted from the rules as defined in
 figure \ref{fig:bin-ass-if-cond} and they have been hidden under the \emph{FUNCTION} relation.
-This function relation is for demonstration purpose only and it is responsible to emit
-the appropriate variables and generate their corresponding expressions in either
+This function relation is for demonstration purpose only and it is responsible for emitting
+the appropriate variables and generating their corresponding expressions in either
 case of binary expression assignment or if conditions for the rules to work.
-It essentially attempts to generate the appropriate combination of operands
+The rules behind the FUNCTION relation essentially attempt to generate the appropriate combination of operands
 and expressions based on whether an operand is a constant or a variable.
 
 % TODO: ResolveExpr relation facts produced for example Java program
@@ -405,15 +411,14 @@ and expressions based on whether an operand is a constant or a variable.
 As previously mentioned, the rules presented in this section constitute
 one of the most fundamental parts of our reasoner. They construct the
 most primitive, yet essential expressions of the analyzed program. However,
-the expressions are guarded in a sense that if unrolled, they would all
+the expressions are guarded in the sense that, if unrolled, they would all
 lead to complex expressions between symbolic expressions. We shall mention
 here that any reasoning is purely symbolic, and thus there is not any concrete
 evaluation of the expressions in the sense of constant folding. One could also
-notice that even though the lack of boolean expressions up to this point. That
-is due to the SSA IR upon which any reasoning happens. The various branches,
-however complex they are are split into multiple simplified ones and thus we
-have to keep track of these. In the following section we provide an overview of
-the algorithm responsible for generating those boolean expressions that encode
+notice the lack of boolean expressions up to this point. This
+is due to Soot's IR which converts complex boolean expressions into different
+cotrol flow paths. In the following section we provide an overview of
+the algorithm responsible for generating these boolean expressions that encode
 the control flow constructs of the methods of the input program.
 
 \section{Path Expressions}\label{s:paths}
@@ -421,11 +426,11 @@ the control flow constructs of the methods of the input program.
 Any \doop{} reasoning happens on facts produced at a lower level IR
 called Jimple, Soot's IR. Jimple omits several complex constructs,
 such as boolean expressions. In our case though, we need to have an exact
-representation of those high level control flow constructs in order to be
+representation of these high level control flow constructs in order to be
 able to reason about a program and answer several useful questions about
 it. In order to further facilitate and enhance our core symbolic reasoning
 technique we have introduced several algorithms that are responsible for the
-reconstruction of those expressions, that namely represent the program's branch
+reconstruction of these expressions representing the program's branch
 conditions or complete path predicates.
 
 % TODO: add jimple CFG of our example program
@@ -434,9 +439,9 @@ Even though the analyzed program is quite simplified and the various complex
 control flow structures have been lowered to way simpler forms, the reconstruction
 of the desired predicates is not trivial at all. Complex expressions between operands
 that contain operators such as $\&\&$, $||$ and $!$ have been simplified
-to three-address code (TAC) that completely trim those operators in favor of
+to three-address code (TAC) that completely trims these operators in favor of
 if statements with simplified boolean conditions. Even though we could modify
-the code transformer that lowers the initial program in a way that would avoid those
+the code transformer that lowers the initial program in a way that would avoid these
 transformations, we decided to preserve any external framework functionality as
 it is, implementing any predicate reformation in pure Datalog. Following
 we introduce the algorithm that implements the desired functionality in two parts.
@@ -450,18 +455,28 @@ branch instruction. The algorithm keeps track of the path predicates at any
 program point before and after each instruction. Each branch instruction splits
 two distinct path predicates, whilst any other instruction does not produce
 any new path predicate but rather emits the predicate that holds at the program
-point before it. However, an instruction may have more than
-a single predecessors that lead the execution path
+point before it. However, an instruction may have multiple
+predecessors, that lead the execution path
 up to the program point before it. The decision to consider only a single predecessor
 would lead to inaccurate results as several program paths would have been lost. In
 order for our algorithm to yield sound path predicates we join the
 expressions that hold after each predecessor at the program point before such an
 instruction. Recall that any reasoning is symbolic and there is not any concrete
-evaluation, thus we can not be sure of what path predicates should be discarded.
+evaluation, thus we cannot be sure of what path predicates should be discarded.
 This brief introduction reveals that our algorithm needs to implement
 the following two functionalities: (a) the enumeration of all possible predecessors
 of an instruction and (b) the making of the path predicates for every program
-point.
+point. A path-predicate for label1 in \ref{sc:soot-code} should be thought as follows:
+
+\begin{figure}[th]
+  \begin{equation}
+     \begin{aligned}
+      \left(f == 0 \land t \neq 0\right) \lor t == 0
+    \end{aligned}
+  \end{equation}
+  \captionof{figure}{Path predicate example}
+  \label{fig:path-predicate-ex}
+\end{figure}
 
 In the following figures we are going to introduce the algorithmic parts responsible
 for the instruction predecessors enumeration. The whole logic is implemented in
@@ -518,15 +533,15 @@ The above rules introduce the handling of the least complicated cases. With just
 a few rules we manage to identify the one and only predecessor of an instruction.
 In figure \ref{fig:single-pred} we present the rule that populates the relation
 keeping track of the single predecessors of an instruction which is powered by
-the rules of FirstPredOfInsnInMethod and LastPredOfInsnInMethod relations. In those
+the rules of FirstPredOfInsnInMethod and LastPredOfInsnInMethod relations. In these
 two presented in figures \ref{fig:first-pred} and \ref{fig:last-pred} we leverage
 \doop{}'s control-flow graph (CFG) analysis by using the
 MayPredecessorModuloThrow relation that provides us with the predecessors of an
 instruction. We further aggregate with the help of min and max aggregation functions
 of Souffle in order to distinguish the first and last predecessors of an instruction
-accordingly. Those rules are also utilized during the enumeration of the multiple
+accordingly. These rules are also utilized during the enumeration of the multiple
 predecessors of a single instruction, but they are wrapped into complex rules that
-separate the multiple to the single predecessor case. We present those wrappers
+separate the multiple from the single predecessor case. We present these wrappers
 in figure \ref{fig:pred-wrappers}.
 
 \begin{figure}[th]
@@ -549,7 +564,7 @@ The negation of LastPredOfInsnInMethod in the first rule is required so that
 the FirstOfMultiplePredsOfInsnInMethod relation considers instructions
 with multiple predecessors.\\
 Otherwise it would be equivalent to the
-SinglePredOfInsnInMethod relation, whilst the same also holds for the
+SinglePredOfInsnInMethod relation, while the same also holds for the
 LastOfMultiplePredsOfInsnInMethod. Having introduced the first and last
 predecessors rules for either case, there is the need of introducing the
 rules of the relations associated with yielding an ordering of each
@@ -589,7 +604,7 @@ in figure \ref{fig:pred-ordering}.
 The last rule in figure \ref{fig:pred-ordering} is yet again a wrapper which is used
 for the predecessors enumeration. It populates the associated relation excluding the
 last predecessor. Even though there are many different ways to tackle this problem, we
-decided to provide an interim relation which when negated yields the next predecessor
+decided to provide an intermediate relation which when negated yields the next predecessor
 in the enumeration. The rule feeding that relation, named NotNextPredOfInsnInMethod, considers
 the previous and next possible predecessor of an instruction and asserts that in case there is
 another one between them the rule shall fail. Thus, the negation of this relation yields the
@@ -609,7 +624,7 @@ PathExpressionAfterFalse relations.
     \rel{PathExpressionAfterTrue}{?meth, ?insn, ?cond},\\
     \rel{PathExpressionAfterFalse}{?meth, ?insn, ?negatedCond} \rulearrow\\
     \tab \rel{FirstIfInsnInMethod}{?insn, ?meth},\\
-    \tab \rel{NegationOfConditionAtIfInsn}{?cond, ?negatedCond, ?insn}.\\\\
+    \tab \rel{NegationOfConditionAtIfInsn}{?cond, ?negatedCond, ?insn}.\\
 
     \rel{PathExpressionAfterTrue}{?meth, ?insn, ?pathExpr1},\\
     \rel{PathExpressionAfterFalse}{?meth, ?insn, ?pathExpr2} \rulearrow \\
@@ -617,7 +632,7 @@ PathExpressionAfterFalse relations.
     \tab \rel{NegationOfConditionAtIfInsn}{?cond, ?negatedCond, ?insn},\\
     \tab \record{?cond}\singlefieldbrackets{?op, ?type, ?exprLeft, ?exprRight},\\
     \tab \record{?pathExpr1}\singlefieldbrackets{"\&\&", ?type, ?cond, ?pathExpr},\\
-    \tab \record{?pathExpr2}\singlefieldbrackets{"\&\&", ?type, ?negatedCond, ?pathExpr}.\\\\
+    \tab \record{?pathExpr2}\singlefieldbrackets{"\&\&", ?type, ?negatedCond, ?pathExpr}.\\
 
     \rel{PathExpressionAfterTrue}{?meth, ?insn, ?pathExpr} \rulearrow\\
     \tab \rel{PathExpressionBefore}{?meth, ?insn, ?pathExpr},\\
@@ -627,37 +642,22 @@ PathExpressionAfterFalse relations.
   \label{fig:path-after}
 \end{figure}
 
-The path expression predicates are split into two disjoint sets of \emph{true} and \emph{false}
-conjuncts due to the separation of a program path after a branch instruction. A branch
-instruction leads to different execution paths based on whether the condition succeeds or not.
-In order to differentiate between the two, we have introduced the
-NegationOfConditionAtIfInsn relation that
-yields the negated condition of a branch condition that would be used to
-generate the complement of a path predicate. The first rule in figure \ref{fig:path-after}
-represents the basis of any path predicate formation, whist the second one further
-splits each path predicate into two subsequent expressions. The last rule represents
-the path predicate after any statement that is not a branch instruction. However, those
-rules heavily depend on the existence of path predicates on the program point right
-before each instruction. In figures \ref{fig:path-before} 
-we present the rules of the relations that yield the path predicates at the
-program point before each instruction for the single predecessor case.
-
 \begin{figure}[th]
   \begin{tabular}{l}
     \rel{PathExpressionBefore}{?meth, ?insn, ?expr} \rulearrow \\
     \tab \rel{PathExpressionAfterTrue}{?meth, ?pred, ?expr},\\
     \tab \rel{SinglePredOfInsnInMethod}{?pred, ?insn, ?meth},\\
-    \tab \rel{isIf\_Insn}{?pred}, \rel{isJumpTarget}{?insn}.\\\\
+    \tab \rel{isIf\_Insn}{?pred}, \rel{isJumpTarget}{?insn}.\\
 
     \rel{PathExpressionBefore}{?meth, ?insn, ?expr} \rulearrow \\
     \tab \rel{PathExpressionAfterFalse}{?meth, ?pred, ?expr},\\
     \tab \rel{SinglePredOfInsnInMethod}{?pred, ?insn, ?meth},\\
-    \tab \rel{isIf\_Insn}{?pred}, \rel{!isJumpTarget}{?insn}.\\\\
+    \tab \rel{isIf\_Insn}{?pred}, \rel{!isJumpTarget}{?insn}.\\
 
     \rel{PathExpressionBefore}{?meth, ?insn, ?expr} \rulearrow \\
     \tab \rel{PathExpressionAfterTrue}{?meth, ?pred, ?expr},\\
     \tab \rel{SinglePredOfInsnInMethod}{?pred, ?insn, ?meth},\\
-    \tab \rel{!isIf\_Insn}{?pred}.\\\\
+    \tab \rel{!isIf\_Insn}{?pred}.\\
   \end{tabular}
   \begin{tabular}{l}
   \end{tabular}
@@ -665,10 +665,25 @@ program point before each instruction for the single predecessor case.
   \label{fig:path-before}
 \end{figure}
 
+The path expression predicates are split into two disjoint sets of \emph{true} and \emph{false}
+conjuncts due to the separation of a program path after a branch instruction. A branch
+instruction leads to different execution paths based on whether the condition succeeds or not.
+In order to differentiate between the two, we have introduced the
+NegationOfConditionAtIfInsn relation that
+yields the negated condition of a branch condition that would be used to
+generate the complement of a path predicate. The first rule in figure \ref{fig:path-after}
+represents the basis of any path predicate formation, while the second one further
+splits each path predicate into two subsequent expressions. The last rule represents
+the path predicate after any statement that is not a branch instruction. However, these
+rules heavily depend on the existence of path predicates on the program point right
+before each instruction. In figure \ref{fig:path-before}
+we present the rules of the relations that yield the path predicates at the
+program point before each instruction for the single predecessor case.
+
 The complicated case of the construction of the before-path predicates is essentially when
 an instruction has multiple predecessors that flow up to it. In order to facilitate the
 rules of the relation PathExpressionBefore, we introduced the BuildPathExprBefore relation,
-responsible for constructing a disjunct of all the predecessor path
+responsible for constructing a disjunction of all the predecessor path
 expressions that meet at the program point right before the instruction. The former
 relation rules utilize the predecessor enumeration relations introduced before, by
 implicitly enumerating all over the predecessors. Lastly, we present the logic of
@@ -722,17 +737,18 @@ the disjunct formation in figure \ref{fig:path-before-multiple}.
   \captionof{figure}{Path expression before multiple predecessors}
   \label{fig:path-before-multiple}
 \end{figure}
+\clearpage
 
 All of the rules introduced in this section generate the boolean logic formulas,
-disjuncts and conjuncts. Those formulas are modeled with the help of the
+disjuncts and conjuncts. These formulas are modeled with the help of the
 expression type introduced during the first sections of this thesis. We may now
 proceed to the description of the core algorithm of our analysis, static
 declarative symbolic reasoning.
 
 \section{Boolean Symbolic Reasoning}\label{s:symbolic}
 
-A symbolic reasoner mainly deduces knowledge about the expressions of a program and may get
-as complex as one wants to. Such tool is essentially a theorem prover that given a
+A symbolic reasoner mainly deduces knowledge about the expressions of a program. This knowledge may get
+as complex as one wants to. The symbolic reasoner tool is essentially a theorem prover that given a
 friendly input representation and a set of guiding facts tries to reason about a program
 by constructing formal proofs with the help of a set of inference rules. In the context of this
 work we have introduced a fundamental symbolic reasoner that mainly deduces knowledge about the
@@ -767,8 +783,7 @@ In the following figures we present the Datalog rules describing those axioms.
   \centering
 \begin{minipage}{1.\textwidth}
      \begin{tabular}{l}
-     \rel{ExprImpliesOther}{?expr, ?expr} \rulearrow \\
-     \tab \rel{isBooleanExpr}{?expr}.
+     \rel{ExprImpliesOther}{?expr, ?expr} \rulearrow \rel{isBooleanExpr}{?expr}.
     \end{tabular}
   \captionof{figure}{Self implication}
   \label{fig:self-implication}
@@ -791,6 +806,8 @@ In the following figures we present the Datalog rules describing those axioms.
   \captionof{figure}{$A \rightarrow A \lor B$ and $B \rightarrow A \lor B$}
   \label{fig:or}
 \end{minipage}
+\end{figure}
+\begin{figure}[th]
 \begin{minipage}{1.\textwidth}
   \begin{tabular}{l}
     \rel{ExprImpliesOther}{?expr, ?exprOther} \rulearrow\\
@@ -800,9 +817,6 @@ In the following figures we present the Datalog rules describing those axioms.
   \captionof{figure}{$A \land B \rightarrow B \land A$}
   \label{fig:and-commutativity}
   \end{minipage}
-\end{figure}
-
-\begin{figure}[th]
   \begin{minipage}{1.\textwidth}
     \begin{tabular}{l}
       \rel{ExprImpliesOther}{?expr, ?exprOther} \rulearrow\\
@@ -812,7 +826,6 @@ In the following figures we present the Datalog rules describing those axioms.
     \captionof{figure}{$A \lor B \rightarrow B \lor A$}
     \label{fig:or-commutativity}
   \end{minipage}
-
   \begin{minipage}{1.\textwidth}
   \begin{tabular}{l}
     \rel{ExprImpliesOther}{?expr, ?exprOther} \rulearrow\\
@@ -820,12 +833,13 @@ In the following figures we present the Datalog rules describing those axioms.
     \tab \record{?exprOr}\singlefieldbrackets{"||", "boolean", ?exprB, ?exprC},\\
     \tab \record{?exprLeft}\singlefieldbrackets{"\&\&", "boolean", ?exprA, ?exprB},\\
     \tab \record{?exprRight}\singlefieldbrackets{"\&\&", "boolean", ?exprA, ?exprC},\\
-    \tab \record{?exprOther}\singlefieldbrackets{"||", "boolean", ?exprLeft, ?exprRight}.\\
+    \tab \record{?exprOther}\singlefieldbrackets{"||", "boolean", ?exprLeft, ?exprRight}.
   \end{tabular}
   \captionof{figure}{$A \land (B \lor C) \rightarrow (A \land B) \lor (A \land C)$}
   \label{fig:distributive-and-a}
   \end{minipage}
-
+% \end{figure}
+% \begin{figure}[th]
   \begin{minipage}{1.\textwidth}
   \begin{tabular}{l}
     \rel{ExprImpliesOther}{?expr, ?exprOther} \rulearrow\\
@@ -833,12 +847,11 @@ In the following figures we present the Datalog rules describing those axioms.
     \tab \record{?exprLeft}\singlefieldbrackets{"\&\&", "boolean", ?exprA, ?exprB},\\
     \tab \record{?exprRight}\singlefieldbrackets{"\&\&", "boolean", ?exprA, ?exprC},\\
     \tab \record{?exprNRight}\singlefieldbrackets{"||", "boolean", ?exprB, ?exprC},\\
-    \tab \record{?exprOther}\singlefieldbrackets{"\&\&", "boolean", ?exprA, ?exprNRight}.\\
+    \tab \record{?exprOther}\singlefieldbrackets{"\&\&", "boolean", ?exprA, ?exprNRight}.
   \end{tabular}
   \captionof{figure}{$(A \land B) \lor (A \land C) \rightarrow A \land (B \lor C)$}
   \label{fig:distributive-and-b}
   \end{minipage}
-
 \begin{minipage}{1.\textwidth}
   \begin{tabular}{l}
     \rel{ExprImpliesOther}{?expr, ?exprOther} \rulearrow\\
@@ -851,7 +864,8 @@ In the following figures we present the Datalog rules describing those axioms.
   \captionof{figure}{$A \lor (B \land C) \rightarrow (A \lor B) \land (A \lor C)$}
   \label{fig:distributive-or-a}
 \end{minipage}
-
+% \end{figure}
+% \begin{figure}[h]
 \begin{minipage}{1.\textwidth}
   \begin{tabular}{l}
     \rel{ExprImpliesOther}{?expr, ?exprOther} \rulearrow\\
@@ -865,6 +879,7 @@ In the following figures we present the Datalog rules describing those axioms.
   \label{fig:distributive-or-b}
 \end{minipage}
 \end{figure}
+\clearpage
 
 \subsection{Propositional Logic Inference Rules}
 
@@ -883,24 +898,8 @@ The formal definition of a logical inference rule that takes only two premises i
 \end{equation}
 
 where P and Q are metavariables which are essentially logical sentences that may consist
-of multiple logical statements.\\
-
-An equivalent definition of the equation \ref{eq:inference-rule}, also known as
-\emph{modus ponens} is:
-
-\begin{equation}
-  \label{eq:modus-ponens}
-  \begin{aligned}
-  \begin{array}{rl}
-    & P,  P \to Q \\
-    \cline{2-2}
-    & Q
-  \end{array}
-  \end{aligned}
-\end{equation}
-
-Based on the definitions above we introduce a set of inference rules that are the ones
-responsible to power up our analysis.
+of multiple logical statements. Based on the definitions above we introduce a set of inference
+rules that are the ones responsible for powering our analysis.
 
 \begin{figure}[th]
   \centering
@@ -962,6 +961,10 @@ responsible to power up our analysis.
   \captionof{figure}{$True \vdash A \rightarrow True$}
   \label{fig:rule-e}
 \end{minipage}
+\end{figure}
+
+\clearpage
+\begin{figure}[t]
 \begin{minipage}{1.\textwidth}
   \begin{tabular}{l}
     \rel{ExprImpliesOther}{?expr, ?exprOther} \rulearrow\\
@@ -972,9 +975,6 @@ responsible to power up our analysis.
   \captionof{figure}{$A \rightarrow (B \lor False) \vdash A \rightarrow B$}
   \label{fig:rule-e}
 \end{minipage}
-\end{figure}
-
-\begin{figure}[t]
   \begin{tabular}{l}
     \rel{ExprImpliesOther}{?expr, ?exprOther} \rulearrow\\
     \tab \rel{ExprImpliesOther}{?exprCompOther, ?exprOther},\\
@@ -985,4 +985,8 @@ responsible to power up our analysis.
   \label{fig:rule-f}
 \end{figure}
 
-% TODO: Add arithmetic axioms
+
+As seen above, we have encoded our tool's core reasoning within a set of few rules of pure Datalog.
+Even though our approach builds on top of propositional logic theory it manages to express
+several logical rules of inference and forms the basis for introducing more powerful theories within
+the scope of our reasoner, such as the theory of arithmetic.
