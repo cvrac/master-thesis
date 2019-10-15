@@ -17,4 +17,31 @@ the Computer Science community, with applications that span from program analysi
 systems. The main power of declarative languages is that they allow to focus on the goal, rather than
 how to achieve it.
 
+In the context of this work, we attempt to introduce a strictly declarative theorem prover - \emph{symbolic reasoner} -
+in Datalog. Our main motivation yields from the successful applications of such tools in the literature, while
+the use of Datalog as the implementation languages originates from its expressiveness and its widely recognized
+success, especially in the field of Program Analysis. Our reasoner is implemented as an enhancement to the
+\doop{} Framework for Java Pointer analysis, aiming to leverage its powerful constructs and the possible
+utilization of our approach in \doop{}'s core in the future.
+
 \section{Thesis Structure}\label{s:structure}
+
+The rest of this thesis is organized as follows:
+
+We provide a brief background overview of static program analysis, symbolic execution,
+theorem proving and Datalog in \ref{c:background} chapter. In the \ref{c:main-content}
+chapter
+
+\begin{itemize}
+  \item We introduce the core types and schema relations for our reasoning in \ref{s:schema-relations-types}.
+  \item We extensively describe the generation of program expression trees in \ref{s:pets}
+  \item We introduce a path-sensitive analysis to reconstruct boolean expressions and
+    represent program paths within \ref{s:paths}
+  \item In \ref{s:symbolic} we build our symbolic reasoning logic, based on the constructs
+    introduced in the previous sections.
+\end{itemize}
+
+Lastly, in \ref{c:evaluations} we provide a brief evaluation of our approach that arguably seems to
+scale relatively well next to a simple \doop{} context-insensitive analysis, and in
+\ref{c:conclusions} we conclude what were the most valuable key points of our approach and
+the next steps that would be worth exploring.
