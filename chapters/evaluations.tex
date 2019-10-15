@@ -1,4 +1,49 @@
-%TODO: Add evaluations
-
 \chapter{Evaluations}\label{c:evaluations}
-foolala
+
+In this chapter we provide a short evaluation of
+our approach. The main purpose of this work was to investigate
+how easily could a theorem prover be implemented in the Datalog
+programming language. Our main motivation for this
+work has been the successful application of theorem provers
+in techniques such as symbolic execution. To this end, we
+wanted our approach to lay the foundations for the integration
+of a theorem prover in \doop{}'s reasoning. We evaluated our
+approach for three different input JARs based on the DaCapo
+benchmarks\cite{DaCapo:paper}. These JARs are associated to
+ANTLR \cite{ANTLR}, HSQLDB \cite{HSQLDB} and Jython \cite{JYTHON}.
+In the following table we provide some measurements regarding
+the time needed for the analyses to run. We have evaluated
+our approach on \doop{}'s context-insensitive analysis with
+symbolic reasoning either turned on or off. For the symbolic
+reasoning runs, we also wanted to evaluate how many program expressions
+are identified along with how many expression implications are infered.
+
+\begin{center}
+\begin{tabular}{ |c|c|c|c|c|c| }
+ \hline
+ Input Jar & Fact Generation & CI + Symbolic & CI & Expressions & ExprImpliesOther\\
+ \hline
+ ANTLR & 49 sec & 48 sec& 33 sec & 608.547 & 863.864 \\
+ \hline
+ HSQLDB & 51 sec& 43 sec& 25 sec& 653.207 & 916.722 \\
+ \hline
+ Jython & 33 sec& 79 sec& 77 sec& 418.389 & 590.549 \\
+ \hline
+\end{tabular}
+\captionof{table}{Analysis evaluation}
+\label{tab:analysis}
+\end{center}
+
+\doop{}'s context-insensitive analysis performs a pointer analysis
+without any context consideration for its reasoning. Our symbolic
+reasoning approach is implemented as complement to any of \doop{} main analyses, and
+thus it further burdens the analysis execution times, as observed
+in \ref{tab:analysis}. It is also worth mentioning that \doop{} does not
+benefit in any way from our approach at the moment.
+However we may easily notice that our reasoner, even
+though quite simple, manages to identify a set of expressions, also
+providing a relatively satisfying number of expression implications.
+These numbers are quite encouraging, as further restricting the
+reasoning to discard certain sets of expressions and introducing
+more logic theories as part of our reasoner would certainly provide
+more accurate results.
