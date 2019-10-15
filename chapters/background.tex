@@ -7,16 +7,16 @@ there are memory leaks or whether some piece of code is reachable.
 
 Such techniques come in different flavors, either static or dynamic, and are
 usually based on strong mathematical concepts. In this section we provide
-a brief background on these concepts and frameworks utilized towards
+a brief background on these concepts and frameworks tailored to
 the development of program analysis tools.
 
 \section{Static Program Analysis}
 
 Static program analysis is a program analysis technique that aims to reason
-about a program's behaviors without actually executing it. It has been
-heavily utilized by optimizing compilers since their early stages and it
-has also found several other applications, among the areas of software security,
-software correctness\cite{spa}. The question of whether
+about a program's behaviors without actually executing it. Program analysis techniques have been
+heavily utilized by optimizing compilers since their early stages and they
+have also found several other applications among the areas of software security
+and software correctness\cite{spa}. The question of whether
 a program is correct or may terminate for all possible inputs is in general
 undecidable. However, static analysis techniques are able to tackle
 undecidability by over-approximating or under-approximating the initial problem,
@@ -36,21 +36,20 @@ those choices in the context of this work.
 
 \subsection{Whole-Program vs. Modular Analyses}
 
-Whole-Program analyses need not be confused with \emph{inter-procedural} analyses.
+Whole-Program analyses should not be confused with \emph{inter-procedural} analyses.
 An inter-procedural analysis considers multiple functions in order to perform
-its computations. However, a \emph{whole}-program analysis does not only reason
-about a program's properties across different functions, but also includes any
-external dependencies during its computations, such as external libraries or
-native calls.
+its computations. In the \emph{intra-procedural} setting instead, an analysis would
+restrict its reasoning within a specific function bound, overlooking the way
+that function calls or external dependencies affect the computations inside the function.
+However, someone could also perform a modular-style analysis across a relatively small
+set of functions, that is an \emph{inter-procedural} analysis.
 
-On the contrary, a \emph{modular}-analysis reasons about specific parts of a
-program, disregarding dependencies across different calls and external code.
-Modular-analysis is fundamentally proportional to \emph{intra}-procedural analyses.
-In the intra-procedural setting, an analysis would restrict its reasoning within
-a specific function bound, overlooking the way that function calls or external
-dependencies affect the computations inside the function. However, someone could
-also perform a modular-style analysis across a relatively small set of functions,
-that is an \emph{inter-procedural} analysis.
+A \emph{modular}-analysis performs its computations within modular
+units, disregarding external code dependencies and mainly does not attempt
+any reasoning accross the heap. On the contrary, a \emph{whole}-program analysis
+reasons about a program's properties at every program point by
+simultaneously constructing a whole-program heap representation of the program
+to be leveraged during the analysis computations.
 
 Whether the analysis would reason about a program's properties in a whole-program
 or a modular manner is of great importance, because such a decision affects the
@@ -179,7 +178,7 @@ programs.
 
 \textit{Automated theorem proving}, namely the ability to automatically prove a
 mathematical theorem has been the insatiable desire of the scientific
-community for an extensive period of time. Theorem proving's establishment
+community for an extensive period of time. Theorem proving's foundation
 is essentially mathematical logic formulas and modelling. On the other hand,
 \textit{Computer Science} foundations lie within mathematics and logic.
 Many times software developers want to prove that a specific property is satisfied
@@ -194,7 +193,7 @@ part of Artificial Intelligence (AI). However, human assistance would be essenti
 in many cases, leading at the same time to the recognition of unable to be proven
 theorems (such as termination).
 
-Automated theorem proving has lead to the creation of several tools following
+Automated theorem proving has led to the creation of several tools following
 different approaches to solve the same problem: proof construction. Of particular
 interest have been satisfiability modulo theories (SMT) provers (or solvers)
 that are the main tools employed in symbolic execution. SMT is a generalization
