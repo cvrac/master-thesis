@@ -59,7 +59,7 @@ label2:
 \end{figure}
 
 
-\section{Schema Relations and Types}
+\section{Schema Relations and Types}\label{s:schema-relations-types}
 
 \subsection{Input Facts and Types}
 
@@ -210,7 +210,7 @@ is powered by the rules of \emph{ExprImpliesOther}, \emph{ExprIsAlwaysTrue}, \em
 and \emph{ExprIsNegationOfOther} relations, attempting to prove \emph{implications} between the expressions
 and assert those that hold \emph{true} or \emph{false} equivalently, if possible.\\
 
-\section{Program Expression Trees}
+\section{Program Expression Trees}\label{s:pets}
 
 % Expressions produced by the resolve expr for the example program
 % Description of the rules related to the ResolveExpr relation, omitting some details
@@ -416,7 +416,7 @@ have to keep track of these. In the following section we provide an overview of
 the algorithm responsible for generating those boolean expressions that encode
 the control flow constructs of the methods of the input program.
 
-\section{Path Expressions}
+\section{Path Expressions}\label{s:paths}
 
 Any \doop{} reasoning happens on facts produced at a lower level IR
 called Jimple, Soot's IR. Jimple omits several complex constructs,
@@ -729,7 +729,7 @@ expression type introduced during the first sections of this thesis. We may now
 proceed to the description of the core algorithm of our analysis, static
 declarative symbolic reasoning.
 
-\section{Boolean Symbolic Reasoning}
+\section{Boolean Symbolic Reasoning}\label{s:symbolic}
 
 A symbolic reasoner mainly deduces knowledge about the expressions of a program and may get
 as complex as one wants to. Such tool is essentially a theorem prover that given a
