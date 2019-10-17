@@ -61,6 +61,7 @@
 \newcommand{\episourcefont}{\scshape}
 
 \makeatletter
+
 \newsavebox{\epi@textbox}
 \newsavebox{\epi@sourcebox}
 \newlength\epi@finalwidth
@@ -106,10 +107,11 @@
 
 \import{./}{misc/authors.tex}
 
+\cftsetindents{section}{0em}{3em}
+\cftsetindents{subsection}{1em}{3em}
 
 \begin{document}
 
-% counting
 \counterwithout{figure}{chapter}
 \counterwithout{table}{chapter}
 \counterwithout{lstlisting}{chapter}
@@ -117,6 +119,8 @@
 \frontmatter
 
 \mainmatter
+
+\setcounter{page}{14}
 
 \import{./}{chapters/introduction.tex}
 \import{./}{chapters/background.tex}

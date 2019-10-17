@@ -84,7 +84,23 @@
 
 \renewcommand{\lstlistoflistings}{\listoflistings}
 
-\renewcommand{\cftsecfont}{\normalfont\bfseries} % section titles in bold
+\newcommand\queryfont[3]{%
+  \ifx\@currsize#1
+    #2%
+  \else
+    #3%
+  \fi
+}
+
+\renewcommand{\cftsetpnumwidth}{5em}
+\renewcommand{\cftsetrmarg}{6em}
+\renewcommand{\cftsecpagefont}{\footnotesize\bfseries}
+\renewcommand{\cftsubsecpagefont}{\footnotesize}
+\renewcommand{\cftdotsep}{0}
+\renewcommand{\cftchapleader}{\bfseries\cftdotfill{\cftdotsep}}
+\renewcommand{\cftchapfont}{\normalsize\bfseries}
+\renewcommand{\cftsecfont}{\footnotesize\bfseries} % section titles in bold
+\renewcommand{\cftsubsecfont}{\footnotesize}
 \renewcommand{\cftfignumwidth}{5em}
 \renewcommand{\cftfigpresnum}{Figure }
 \renewcommand{\cftfigaftersnum}{:}
@@ -101,6 +117,7 @@
 \renewcommand{\cftlistingspresnum}{Code }
 \renewcommand{\cftlistingsaftersnum}{:}
 
+% \setlength\cftbeforesecskip\cftbeforechapskip
 
 \newcommand{\icon}[1]{\includegraphics[width=0.9\textwidth]{#1}}
 

@@ -1,4 +1,4 @@
-\chapter{Static Declarative Symbolic Reasoning}\label{c:main-content}
+\chapter{STATIC DECLARATIVE SYMBOLIC REASONING}\label{c:main-content}
 
 In this chapter we present our approach towards static declarative
 symbolic reasoning. The core of the reasoning is encoded as a
@@ -105,21 +105,25 @@ the same also holds for \_IfVar too. Next, we provide a glimpse of all the
 newly introduced generated facts in figure \ref{fig:facts-new}.
 
 \begin{figure}[th]
-  \begin{minipage}{.51\textwidth}
+  \begin{minipage}{.5\textwidth}
+    \begin{tabular}{l}
   \rel{\_OperatorAt}{insn, operator}.\\
   \rel{\_DummyIfVar}{insn, var}.\\
-  \rel{\_AssignOperFromConstant}{insn, position, from}.\\
-  \rel{\_IfConstant}{insn, position, constant}.\\\\
+  \rel{\_AssignOperFromConstant}{insn,position,from}.\\
+  \rel{\_IfConstant}{insn, position, constant}.\\\\\\
+\end{tabular}
   \captionof{figure}{New \doop{} facts}
   \label{fig:facts-new}
 \end{minipage}
-\begin{minipage}{.59\textwidth}
+\begin{minipage}{.5\textwidth}
+  \begin{tabular}{l}
   \rel{AssignOper\_From}{insn, position, from}.\\
-  \rel{AssignOper\_FromConstant}{insn, position, from}.\\
+  \rel{AssignOper\_FromConstant}{insn,position,from}\\
   \rel{If\_Var}{insn, position, var}.\\
   \rel{If\_Constant}{insn, position, constant}.\\
   \rel{DummyIf\_Var}{insn, var}.\\
   \rel{Operator\_At}{insn, operator}.
+\end{tabular}
   \captionof{figure}{Imported facts}
   \label{fig:imported-facts}
 \end{minipage}
@@ -489,6 +493,7 @@ relations which keep track of the first and last predecessor of an instruction i
 the following figures.
 
 \begin{figure}[th]
+  \centering
   \begin{minipage}{.7\textwidth}
     \begin{tabular}{l}
   \rel{SinglePredOfInsnInMethod}{?pred, ?insn, ?meth} \rulearrow\\

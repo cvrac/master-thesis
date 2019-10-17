@@ -1,4 +1,4 @@
-\chapter{Evaluations}\label{c:evaluations}
+\chapter{EVALUATIONS}\label{c:evaluations}
 
 In this chapter we provide a short evaluation of
 our approach. The main purpose of this work was to investigate
@@ -19,6 +19,8 @@ reasoning runs, we also wanted to evaluate how many program expressions
 are identified along with how many expression implications are infered.
 
 \begin{center}
+\captionof{table}{Analysis evaluation}
+\label{tab:analysis}
 \begin{tabular}{ |c|c|c|c|c|c| }
  \hline
  Input Jar & Fact Generation & CI + Symbolic & CI & Expressions & ExprImpliesOther\\
@@ -30,8 +32,6 @@ are identified along with how many expression implications are infered.
  Jython & 33 sec& 79 sec& 77 sec& 418.389 & 590.549 \\
  \hline
 \end{tabular}
-\captionof{table}{Analysis evaluation}
-\label{tab:analysis}
 \end{center}
 
 \doop{}'s context-insensitive analysis performs a pointer analysis
