@@ -1,0 +1,271 @@
+\chapter{BACKGROUND}\label{c:background}
+
+Several program analysis techniques have been proposed in the literature, in
+order to aid developers and users discover interesting program properties within
+their software. For example, one might be interested in finding out whether
+there are memory leaks or whether some piece of code is reachable.
+
+Such techniques come in different flavors, either static or dynamic, and are
+usually based on strong mathematical concepts. In this section we provide
+a brief background on these concepts and frameworks tailored to
+the development of program analysis tools.
+
+\section{Static Program Analysis}
+
+Static program analysis is a program analysis technique that aims to reason
+about a program's behaviors without actually executing it. Program analysis techniques have been
+heavily utilized by optimizing compilers since their early stages and they
+have also found several other applications among the areas of software security
+and software correctness\cite{spa}. The question of whether
+a program is correct or may terminate for all possible inputs is in general
+undecidable. However, static analysis techniques are able to tackle
+undecidability by over-approximating or under-approximating the initial problem,
+attempting to reason over a simplified version of it.
+
+There is a plethora of different static analysis algorithms in the literature, each one
+met in several domains. For instance, one may utilize analyses such as \emph{liveness} and/or
+\emph{pointer} analyses in an optimizing compiler with the intention of eliminating
+dead code regions or performing a constant propagation/folding optimization.
+Similarly, a \emph{reachability} analysis that determines whether a specific program point is
+reachable could be used by a software correctness tool to make sure that
+an erroneous state is actually never reached.
+
+There is a variety of design choices that may prove essential towards the \emph{scalability}
+and \emph{precision} of a static program analysis algorithm. We briefly describe some of
+those choices in the context of this work.
+
+\subsection{Whole-Program vs. Modular Analyses}
+
+Whole-Program analyses should not be confused with \emph{inter-procedural} analyses.
+An inter-procedural analysis considers multiple functions in order to perform
+its computations. In the \emph{intra-procedural} setting instead, an analysis would
+restrict its reasoning within a specific function bound, overlooking the way
+that function calls or external dependencies affect the computations inside the function.
+However, someone could also perform a modular-style analysis across a relatively small
+set of functions, that is an \emph{inter-procedural} analysis.
+
+A \emph{modular}-analysis performs its computations within modular
+units, disregarding external code dependencies and mainly does not attempt
+any reasoning accross the heap. On the contrary, a \emph{whole}-program analysis
+reasons about a program's properties at every program point by
+simultaneously constructing a whole-program heap representation of the program
+to be leveraged during the analysis computations.
+
+Whether the analysis would reason about a program's properties in a whole-program
+or a modular manner is of great importance, because such a decision affects the
+way that the analysis practitioner would tune its performance - scalability and
+precision. In the whole-program analysis setting the design tradeoffs between
+scalability and precision might prove crucial towards the overall analysis
+reasoning, though a modular-analysis may be able to perform more precise reasoning,
+due to the relatively restricted area of interest. Whole-program analyses are
+commonly used in the analysis of languages with complex language features. Those
+languages, such as the object-oriented ones need to reason about language constructs
+that may reside on the heap, and thus they may benefit from a whole-program analysis
+reasoning. Such an analysis may not take into consideration the
+exact ordering of the instructions of a program, sacrificing precision towards
+better scalability.
+
+\subsection{Flow-Sensitivity}
+
+The concept of whether an analysis is designed with respect to
+the instruction ordering is called \emph{flow-sensitivity}.
+On the contrary, an analysis that is not designed that way is
+called flow-insensitive. Flow-sensitivity is tightly related with
+the scalability and precision of static program analyses, due to the
+fact that a flow-sensitive analysis keeps track of program properties
+at every point of it, e.g. before or after every instruction.
+Whole-program analyses may usually omit the control-flow constructs
+during any of their reasoning. However, many whole-program static
+analyses like the \doop{} framework's Pointer analysis for Java
+manage to add flow-sensitivity to their core analysis by slight
+preprocessing\cite{points-to15}.
+
+Several tools utilize state-of-the-art compiler technologies to
+convert the input source to a lower level \emph{intermediate-representation (IR)}.
+For instance, there is a plethora of tools that utilize the \emph{LLVM Compiler 
+Infrastructure}\cite{llvm-lattner} for \emph{C}-like languages,
+or \emph{Soot - A Java optimization framework}\cite{soot} - for JVM languages.
+These tools may further lower the source code in a
+\emph{Static Single Assignment (SSA)} form. In SSA form, each variable is
+assigned exactly once, never to be re-assigned again and it is also defined
+before any of its uses, thus yielding a flow-sensitive representation.
+
+\subsection{Path-Sensitivity}
+
+A path-sensitive analysis is in a way an enhanced version of a
+flow-sensitive analysis which also considers the path taken up to
+a specific program point. Such an analysis
+introduces a path representation usually encoded as the combination of
+a program's neighboring branch conditional expressions,
+named \textit{path predicate}. A path predicate is essentially a
+\textit{Boolean formula}, that is a function of boolean variables whose assignment yields a
+different control-flow path.
+
+Explicit knowledge of the path taken up to a specific
+program point allows the analysis to achieve higher
+precision, ideally eliminating the need for any approximation.
+However, such knowledge comes at a cost; the number of a program's
+paths is exponential to the number of branches within the program,
+thus an analysis that keeps track of all possible paths would not
+manage to scale. There have been suggested multiple techniques
+\cite{dillig2008sound}, \cite{das2002esp} to address such issues
+in the literature. Some of those techniques manage to achieve
+scalability by restricting the context of the computations or
+by introducing loose abstractions of the initial problem.
+As a static analysis technique a path-sensitive analysis does not
+eventually execute the program, rather utilizes
+the path encoding in order to assert properties that hold at
+specific program points.
+
+One of the adverse effects of pure Static Analysis techniques
+is that they result in a large amount of \textit{false positives} by
+trading off precision for scalability. In the context of
+such techniques, a false positive is said to be an erroneous report
+of a static analysis tool that a property violation has been
+discovered within the analyzed program, though such violation
+does not eventually exist. There have been
+proposed several techniques of either (semi-) dynamic nature
+that execute directly the program via code instrumentation, or
+static solutions that attempt to simulate the execution of a program.
+
+\section{Symbolic Execution}
+
+Symbolic Execution is yet another program analysis technique that
+may be of either static or dynamic flavor and mainly attempts
+to answer whether certain properties of a program could potentially
+be violated by a piece of code\cite{baldoni2018survey}. At the same
+time it also results in an automated way to generate test cases for
+programs under testing.
+
+In contrast to the aforementioned static analysis techniques that
+do not directly execute a program, Symbolic (or \textit{Concolic}) Execution
+mainly attempts to simulate the execution of a
+program by considering symbolic (non-deterministic) values for its input.
+Usually, during the concrete execution of a program a single execution path is
+considered for any computation, whilst a Symbolic Execution engine manages
+to explore a plethora of paths thanks to the symbolic values assigned to
+its input variables. As such, a concrete execution is said to under-approximate
+the desired analysis. \textit{Concolic Execution} is a mixture of symbolic and concrete
+execution that considers concrete input values when possible, thus making
+symbolic execution feasible in practice. The latter is usually described
+as Dynamic Symbolic Execution (DSE). Several tools have been proposed
+in the literature such as SAGE\cite{godefroid2012sage} and KLEE\cite{cadar2008klee},
+that are considered to be the tools of choice when it comes to
+binary analysis and/or systems testing.
+
+In the symbolic setting, execution is typically driven by a
+\textit{symbolic execution engine} which at its core maintains some state
+for every explored path. The core data-structures of such
+an engine are the \textit{Boolean formulas} that encode an execution path by
+considering the satisfied conditions taken for that exact path, and a
+\textit{symbolic store} that keeps a mapping between the variables met within the path
+and their equivalent symbolic expressions or values. The former are constructed
+on each branch execution, while the latter is updated after an assignment to
+the corresponding variable. Established by those two structures for a path,
+the engine utilizes an \textit{automated theorem prover} whose purpose is to
+check whether there is any violation of the property under analysis that
+would lead to a failed execution, besides verifying path feasibility. A path
+is said to be feasible in such scenario, if there exists an assignment of
+concrete values to its symbolic encoding that would yield the satisfiability
+of its boolean formula. Along with \textit{path-explosion} due to the exponential state
+space exploration, non-deterministic inputs and several other vulnerabilities,
+symbolic execution efficiency also relies to the use of efficient external
+theorem provers. Ongoing research attempts to face those threats in order
+to provide better tools that aid developers and help discover bugs in
+programs.
+
+\section{Automated Theorem Proving}
+
+\textit{Automated theorem proving}, namely the ability to automatically prove a
+mathematical theorem has been the insatiable desire of the scientific
+community for an extensive period of time. Theorem proving's foundation
+is essentially mathematical logic formulas and modelling. On the other hand,
+\textit{Computer Science} foundations lie within mathematics and logic.
+Many times software developers want to prove that a specific property is satisfied
+for a program and its given input values, like its termination. Computer
+programs can also be encoded as a logical formula and so formal theorems may be
+constructed in the programming setting too.
+
+The purpose of an automated theorem prover (ATP) is ideally to answer whether a
+theorem can be proven or not, providing at the same time a formal proof
+or a counterexample. Automated theorem proving was initially considered to be
+part of Artificial Intelligence (AI). However, human assistance would be essential
+in many cases, leading at the same time to the recognition of unable to be proven
+theorems (such as termination).
+
+Automated theorem proving has led to the creation of several tools following
+different approaches to solve the same problem: proof construction. Of particular
+interest have been satisfiability modulo theories (SMT) provers (or solvers)
+that are the main tools employed in symbolic execution. SMT is a generalization
+of the traditional boolean satisfiability problem (SAT) that utilizes underlying
+decidable mathematical theories in order to encode and give semantical
+meaning to function predicates instead of boolean (binary) variables. Such theories
+are the theory of linear arithmetic, bitvectors and arrays and provide a powerful
+expressiveness to the related solvers which could also be considered as
+constraint satisfaction engines. Provided a predicate formula encoding, a prover
+aims to check whether the formula is satisfiable; there is an assignment of values
+to the compounded predicates. The state of the art tools for theorem proving
+have been the Z3 Theorem Prover\cite{de2008z3}, and the Coq Proof
+Assistant\cite{Coq}, an interactive theorem prover
+
+\section{Datalog and \doop{}}
+
+\subsection{Datalog}
+
+\textit{Datalog} is a declarative programming language, essentially a subset of the  \textit{Prolog}
+programming language due to the lack of function symbols, the cut operator among
+other features. It is also usually considered a query language and has been described
+as pure SQL enhanhanced with recursion.
+
+Clause ordering does not matter in Datalog, and thus any order of computation is
+guaranteed to yield the same results, unlike Prolog. Computation in Datalog is
+established by declaring \textit{input facts} along with \textit{reasoning rules}. Based on those,
+anything that can be inferred is computed by the underlying engine reaching
+a convergence state due to the fact that only new facts, that is asserted truth,
+can be produced by the inference rules. Such rules are called \textit{monotonic} and
+the associated computation is the \emph{fixed-point}: rules produce new facts
+until a convergence state is reached.
+
+The main statements of Datalog are the inference rules, usually consisting of
+the \emph{head} and the \emph{body}.
+Both the head and the body
+may consist of conjunctions (expressed with the comma operator ,) or
+disjunctions (expressed with the semicolon operator) of predicates, equivalently called
+relations. Sharing many similarities with databases, a relation can be thought
+of as a database table, whilst input facts and inferred knowledge can be thought of as
+the database rows. The comma operator along with the variable constraints that
+may form along the operand relations describes what is essentially known
+as the join operator in the database community.
+
+Datalog has been extensively used both in the academic world and the industry. Several
+prominent knowledge databases have been designed with Datalog being the underlying engine
+(i.e. LogicBlox). Datalog also finds use cases in the construction of network
+specification files, distributed systems, security analysis of
+smart contracts\cite{grech2018madmax}
+and static program analysis. One of the
+static analysis tools that have successfully embodied Datalog to express its analyses
+is the \doop{} framework.
+
+\subsection{The \doop{} framework}
+
+The \doop{} framework is a static program analysis tool particularly performing
+pointer analysis for the languages of the Java Virtual Machine (JVM) ecosystem.
+Late work has also included analysis of Python, and especially TensorFlow programs.
+
+\doop{} analyses are expressed in the Datalog language in a purely declarative
+setting and the framework itself is known to be the first to introduce full,
+end-to-end context-sensitive analyses for JVM based languages. The use of
+Datalog has lead to the generation of new algorithms for pointer analysis
+that manage to scale, yet provide accurate results.
+
+\doop{} at first utilizes the Soot framework to convert the initial
+program, usually compressed as a Java ARchive (JAR) into Java bytecode.
+Based on the bytecode version of the program, \doop{} generates the input
+facts for the analysis, introducing several relations that can be pre-computed.
+The framework then includes the Datalog based Souffle tool for
+static analysis\cite{jordan2016souffle} in order to perform any reasoning starting from
+the provided input facts. That is, Souffle is the tool in which any reasoning happens.
+\doop{} analyses have been expressed by a bunch of Datalog rules in Souffle Datalog.
+Even though several context-sensitive analyses have been expressed, there is not any
+path-sensitive analysis within the framework, thus it relies on the flow-sensitivity
+introduced by Soot.

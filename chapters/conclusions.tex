@@ -1,0 +1,26 @@
+\chapter{CONCLUSIONS AND FUTURE WORK}\label{c:conclusions}
+
+In the previous chapter we provided a brief evaluation of our
+approach. By introducing our reasoner as part of \doop{}, we
+managed to demonstrate several encouraging results. We have also
+managed to demonstrate the simplicity and expressiveness of
+a declarative language such as Datalog. The implementation
+of both core reasoner and its preliminaries came quite naturaly
+to us, proving Datalog to be a tool to be considered for such
+applications. At the same time we also enhanced \doop{} with
+several constructs such as the expression type which could
+prove valuable to \doop{} for further usage.
+
+Our work opens a plethora of research directions to investigate
+in the context of \doop{} and declarative static analysis in
+general. For example, it would make sense to explore the case
+of completely integrating the reasoner in a pointer analysis
+performed by \doop{}. Such an investigation would require the
+utilization of the introduced path-predicates and inference
+rules. The path-predicates are essentially expressions that
+encode the control-flow constructs of a program, and thus
+inferencing over them would lead to the identification of
+unreached program locations not to be included during a
+pointer analysis reasoning. As of the moment \doop{} completely
+lacks path-sensitivity, thus we believe that it would probably
+be of value to research towards this direction.

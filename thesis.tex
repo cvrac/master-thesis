@@ -1,5 +1,9 @@
 \documentclass[inscr,ack,dvipsnames]{dithesis}
 
+% !TEX TS-program = xelatex
+% !TEX options = -shell-escape -synctex=1 -interaction=nonstopmode -file-line-error "%DOC%"
+% !BIB program = bibtex
+
 %\usepackage{graphicx}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -57,6 +61,7 @@
 \newcommand{\episourcefont}{\scshape}
 
 \makeatletter
+
 \newsavebox{\epi@textbox}
 \newsavebox{\epi@sourcebox}
 \newlength\epi@finalwidth
@@ -98,14 +103,15 @@
 %%%%%%%%%%%%%%%%%%%% User-specific package inclusions %%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\import{./}{configuration.tex}
+\import{./}{misc/configuration.tex}
 
-\import{./}{authors.tex}
+\import{./}{misc/authors.tex}
 
+\cftsetindents{section}{0em}{3em}
+\cftsetindents{subsection}{1em}{3em}
 
 \begin{document}
 
-% counting
 \counterwithout{figure}{chapter}
 \counterwithout{table}{chapter}
 \counterwithout{lstlisting}{chapter}
@@ -114,17 +120,13 @@
 
 \mainmatter
 
-% add main chapters/should have capital letters
-\import{./}{introduction.tex}
-%\import{./}{background.tex}
-%\import{./}{preliminaries.tex}
-%\import{./}{relatedwork.tex}
-%\import{./}{pp-algorithms.tex}
-%\import{./}{implementation.tex}
-%\import{./}{datasets.tex}
-%\import{./}{evaluations.tex}
-%\import{./}{conclusions.tex}
-%
+\setcounter{page}{14}
+
+\import{./}{chapters/introduction.tex}
+\import{./}{chapters/background.tex}
+\import{./}{chapters/main.tex}
+\import{./}{chapters/evaluations.tex}
+\import{./}{chapters/conclusions.tex}
 
 \backmatter
 
