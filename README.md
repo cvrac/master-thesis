@@ -1,7 +1,7 @@
 # master-thesis
 Master Thesis text, University of Athens
 
-(writing in progress)
+Title: Datalog Based Symbolic Program Reasoning for Java
 
 # Ack
 
